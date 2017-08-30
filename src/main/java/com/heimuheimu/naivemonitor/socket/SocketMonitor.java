@@ -48,10 +48,6 @@ public class SocketMonitor {
 
     private final Object lock = new Object();
 
-    private SocketMonitor() {
-        //private constructor
-    }
-
     /**
      * 添加 Socket 单次读操作读取的字节长度统计
      * <p>注意：该方法不会抛出任何异常</p>

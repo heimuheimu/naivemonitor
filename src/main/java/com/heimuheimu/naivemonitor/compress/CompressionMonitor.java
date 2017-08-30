@@ -60,10 +60,6 @@ public class CompressionMonitor {
      */
     private final ExecutionTimeInfo decompressExecutionTimeInfo = new ExecutionTimeInfo();
 
-    private CompressionMonitor() {
-        //private constructor
-    }
-
     /**
      * 增加一个被压缩内容字节长度统计信息
      * <p>注意：该方法不会抛出任何异常</p>
