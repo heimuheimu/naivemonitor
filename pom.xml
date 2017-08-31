@@ -23,6 +23,13 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>snapshots</id>
+            <url>http://192.168.16.174:7071/nexus/content/repositories/snapshots</url>
+        </repository>
+    </distributionManagement>
+
     <profiles>
         <profile>
             <id>release</id>
