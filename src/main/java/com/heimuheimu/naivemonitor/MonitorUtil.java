@@ -22,9 +22,37 @@
  * SOFTWARE.
  */
 
+package com.heimuheimu.naivemonitor;
+
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
- * 压缩、解压信息监控，例如累计压缩、解压字节数，压缩、解压操作执行时间，被压缩内容字节长度统计等信息。
+ * 监控器常用方法工具类
  *
  * @author heimuheimu
+ * @ThreadSafe
  */
-package com.heimuheimu.naivemonitor.compress;
+public class MonitorUtil {
+
+    private MonitorUtil() {
+        //prevent construct this class
+    }
+
+    /**
+     * 对目标数值执行 {@link AtomicLong#addAndGet(long)} 操作，如果目标数值执行 add 操作后小于 0，则将其重置为 0
+     *
+     * @param target 目标数值
+     * @param delta add 操作需要增加的数量
+     * @return 执行 add 操作后的目标数值大小，不会小于 0
+     */
+    public static long safeAdd(AtomicLong target, long delta) {
+        long value = target.addAndGet(delta);
+        if (value >= 0) {
+            return value;
+        } else {
+            target.set(0);
+            return 0;
+        }
+    }
+
+}

@@ -25,42 +25,39 @@
 package com.heimuheimu.naivemonitor.falcon.support;
 
 import com.heimuheimu.naivemonitor.falcon.FalconData;
-import com.heimuheimu.naivemonitor.socket.SocketMonitor;
+import com.heimuheimu.naivemonitor.monitor.CompressionMonitor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Socket 信息采集器抽象实现
+ * 压缩信息采集器抽象实现
  *
  * @author heimuheimu
  */
-public abstract class AbstractSocketInfoCollector extends AbstractFalconDataCollector {
+public abstract class AbstractCompressionDataCollector extends AbstractFalconDataCollector {
 
-    private volatile long lastReadBytes = 0;
-
-    private volatile long lastWriteBytes = 0;
+    private volatile long lastReduceBytes = 0;
 
     /**
-     * 获得当前 Socket 信息采集器所依赖的数据源
+     * 获得压缩信息采集器所依赖的数据源
      *
-     * @return Socket 信息采集器所依赖的数据源
+     * @return 压缩信息采集器所依赖的数据源
      */
-    protected abstract SocketMonitor getSocketMonitor();
+    protected abstract List<CompressionMonitor> getCompressionMonitorList();
 
 
     @Override
     public List<FalconData> getList() {
-        SocketMonitor socketMonitor = getSocketMonitor();
+        List<CompressionMonitor> compressionMonitorList = getCompressionMonitorList();
         List<FalconData> falconDataList = new ArrayList<>();
 
-        long readBytes = socketMonitor.getGlobalInfo().getReadSize().getSize();
-        falconDataList.add(create("_socket_read_bytes", readBytes - lastReadBytes));
-        lastReadBytes = readBytes;
-
-        long writeBytes = socketMonitor.getGlobalInfo().getWriteSize().getSize();
-        falconDataList.add(create("_socket_write_bytes", writeBytes - lastWriteBytes));
-        lastWriteBytes = writeBytes;
+        long reduceBytes = 0;
+        for (CompressionMonitor compressionMonitor : compressionMonitorList) {
+            reduceBytes += compressionMonitor.getReduceByteCount();
+        }
+        falconDataList.add(create("_compression_reduce_bytes", reduceBytes - lastReduceBytes));
+        lastReduceBytes = reduceBytes;
 
         return falconDataList;
     }

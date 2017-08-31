@@ -21,54 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package com.heimuheimu.naivemonitor.falcon.support;
 
-import com.heimuheimu.naivemonitor.ExecutionTimeInfo;
 import com.heimuheimu.naivemonitor.falcon.FalconData;
+import com.heimuheimu.naivemonitor.monitor.ThreadPoolMonitor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 执行时间信息采集器抽象实现
+ * 线程池信息采集器抽象实现
  *
  * @author heimuheimu
  */
-public abstract class AbstractExecutionTimeInfoCollector extends AbstractFalconDataCollector {
+public abstract class AbstractThreadPoolDataCollector extends AbstractFalconDataCollector {
 
-    private volatile long lastExecutionCount = 0;
-
-    private volatile long lastTotalExecutionTime = 0;
+    private volatile long lastRejectedCount = 0;
 
     /**
-     * 获得当前执行时间信息采集器所依赖的数据源
+     * 获得当前线程池信息采集器所依赖的数据源
      *
-     * @return 执行时间信息采集器所依赖的数据源
+     * @return 线程池信息采集器所依赖的数据源
      */
-    protected abstract ExecutionTimeInfo getExecutionTimeInfo();
+    protected abstract ThreadPoolMonitor getThreadPoolMonitor();
 
     @Override
     public List<FalconData> getList() {
-        ExecutionTimeInfo executionTimeInfo = getExecutionTimeInfo();
+        ThreadPoolMonitor threadPoolMonitor = getThreadPoolMonitor();
         List<FalconData> falconDataList = new ArrayList<>();
 
-        //平均执行时间
-        long executionCount = executionTimeInfo.getCount();
-        long totalExecutionTime = executionTimeInfo.getTotalExecutionTime();
-        double avgExecTime;
-        if (executionCount > lastExecutionCount) {
-            avgExecTime = (totalExecutionTime - lastTotalExecutionTime) / (executionCount - lastExecutionCount);
-        } else {
-            avgExecTime = 0;
-        }
-        falconDataList.add(create("_avg_exec_time", avgExecTime));
-        lastExecutionCount = executionCount;
-        lastTotalExecutionTime = totalExecutionTime;
+        falconDataList.add(create("_threadPool_active_count", threadPoolMonitor.getActiveCount()));
 
-        //最大执行时间
-        falconDataList.add(create("_max_exec_time", executionTimeInfo.getMaxExecutionTime()));
-        executionTimeInfo.resetMaxExecutionTime();
+        falconDataList.add(create("_threadPool_pool_size", threadPoolMonitor.getPoolSize()));
+
+        falconDataList.add(create("_threadPool_peak_pool_size", threadPoolMonitor.getPeakPoolSize()));
+
+        falconDataList.add(create("_threadPool_core_pool_size", threadPoolMonitor.getCorePoolSize()));
+
+        falconDataList.add(create("_threadPool_maximum_pool_size", threadPoolMonitor.getMaximumPoolSize()));
+
+        long rejectedCount = threadPoolMonitor.getRejectedCount();
+        falconDataList.add(create("_threadPool_rejected_count", rejectedCount - lastRejectedCount));
+        lastRejectedCount = rejectedCount;
 
         return falconDataList;
     }
+
 }
