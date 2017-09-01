@@ -103,16 +103,27 @@ public class ExecutionMonitor {
      * @param errorCode 操作失败错误码，由使用方自行定义
      */
     public void onExecutedError(long startNanoTime, int errorCode) {
+        onExecutedError(startNanoTime, errorCode, 1);
+    }
+
+    /**
+     * 对执行失败的操作进行监控，执行开始时间应该在操作开始前执行 {@link System#nanoTime()} 方法获取
+     *
+     * @param startNanoTime 操作执行开始时间，单位：纳秒
+     * @param errorCode 操作失败错误码，由使用方自行定义
+     * @param errorCount 该错误码对应的失败次数，单次执行允许增加多次错误码对应的失败次数
+     */
+    public void onExecutedError(long startNanoTime, int errorCode, int errorCount) {
         long estimatedTime = System.nanoTime() - startNanoTime;
         onExecuted(estimatedTime);
 
         //操作执行失败总次数 +1
-        AtomicLong errorCount = errorCountMap.get(errorCode);
-        if (errorCount == null) {
-            errorCount = new AtomicLong();
-            errorCountMap.put(errorCode, errorCount);
+        AtomicLong existedErrorCount = errorCountMap.get(errorCode);
+        if (existedErrorCount == null) {
+            existedErrorCount = new AtomicLong();
+            errorCountMap.put(errorCode, existedErrorCount);
         }
-        MonitorUtil.safeAdd(errorCount, 1);
+        MonitorUtil.safeAdd(existedErrorCount, errorCount);
     }
 
     /**
