@@ -48,7 +48,6 @@ public abstract class AbstractSocketDataCollector extends AbstractFalconDataColl
      */
     protected abstract List<SocketMonitor> getSocketMonitorList();
 
-
     @Override
     public List<FalconData> getList() {
         List<SocketMonitor> socketMonitorList = getSocketMonitorList();

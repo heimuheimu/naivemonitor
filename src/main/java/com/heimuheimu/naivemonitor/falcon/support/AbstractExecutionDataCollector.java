@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author heimuheimu
  */
-public abstract class AbstractExecutionInfoCollector extends AbstractFalconDataCollector {
+public abstract class AbstractExecutionDataCollector extends AbstractFalconDataCollector {
 
     private volatile long lastExecutionCount = 0;
 
