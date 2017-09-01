@@ -37,7 +37,11 @@ import java.util.List;
  */
 public abstract class AbstractSocketDataCollector extends AbstractFalconDataCollector {
 
+    private volatile long lastReadCount = 0;
+
     private volatile long lastReadByteCount = 0;
+
+    private volatile long lastWrittenCount = 0;
 
     private volatile long lastWrittenByteCount = 0;
 
@@ -53,17 +57,38 @@ public abstract class AbstractSocketDataCollector extends AbstractFalconDataColl
         List<SocketMonitor> socketMonitorList = getSocketMonitorList();
         List<FalconData> falconDataList = new ArrayList<>();
 
+        long readCount = 0;
         long readByteCount = 0;
+
+        long writtenCount = 0;
         long writtenByteCount = 0;
 
         for (SocketMonitor socketMonitor : socketMonitorList) {
+            readCount += socketMonitor.getReadCount();
             readByteCount += socketMonitor.getReadByteCount();
+
+            writtenCount += socketMonitor.getWrittenCount();
             writtenByteCount += socketMonitor.getWrittenByteCount();
         }
-        falconDataList.add(create("_socket_read_bytes", readByteCount - lastReadByteCount));
-        falconDataList.add(create("_socket_written_bytes", writtenByteCount - lastWrittenByteCount));
 
+        falconDataList.add(create("_socket_read_bytes", readByteCount - lastReadByteCount));
+        long averageReadBytes = 0;
+        if (readCount > lastReadCount) {
+            averageReadBytes = (readByteCount - lastReadByteCount) / (readCount - lastReadCount);
+        }
+        falconDataList.add(create("_socket_avg_read_bytes", averageReadBytes));
+
+        falconDataList.add(create("_socket_written_bytes", writtenByteCount - lastWrittenByteCount));
+        long averageWrittenBytes = 0;
+        if (writtenCount > lastWrittenCount) {
+            averageWrittenBytes = (writtenByteCount - lastWrittenByteCount) / (writtenCount - lastWrittenCount);
+        }
+        falconDataList.add(create("_socket_avg_written_bytes", averageWrittenBytes));
+
+        lastReadCount = readCount;
         lastReadByteCount = readByteCount;
+
+        lastWrittenCount = writtenCount;
         lastWrittenByteCount = writtenByteCount;
 
         return falconDataList;

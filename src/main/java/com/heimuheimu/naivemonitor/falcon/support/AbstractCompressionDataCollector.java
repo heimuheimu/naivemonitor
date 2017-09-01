@@ -37,6 +37,8 @@ import java.util.List;
  */
 public abstract class AbstractCompressionDataCollector extends AbstractFalconDataCollector {
 
+    private volatile long lastCompressedCount = 0;
+
     private volatile long lastReduceBytes = 0;
 
     /**
@@ -52,11 +54,22 @@ public abstract class AbstractCompressionDataCollector extends AbstractFalconDat
         List<CompressionMonitor> compressionMonitorList = getCompressionMonitorList();
         List<FalconData> falconDataList = new ArrayList<>();
 
+        long compressedCount = 0;
         long reduceBytes = 0;
+
         for (CompressionMonitor compressionMonitor : compressionMonitorList) {
+            compressedCount += compressionMonitor.getCompressedCount();
             reduceBytes += compressionMonitor.getReduceByteCount();
         }
+
         falconDataList.add(create("_compression_reduce_bytes", reduceBytes - lastReduceBytes));
+        long averageReduceBytes = 0;
+        if (compressedCount > lastCompressedCount) {
+            averageReduceBytes = (reduceBytes - lastReduceBytes) / (compressedCount - lastCompressedCount);
+        }
+        falconDataList.add(create("_compression_avg_reduce_bytes", averageReduceBytes));
+
+        lastCompressedCount = compressedCount;
         lastReduceBytes = reduceBytes;
 
         return falconDataList;
