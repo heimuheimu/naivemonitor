@@ -44,24 +44,39 @@ public abstract class AbstractThreadPoolDataCollector extends AbstractFalconData
      *
      * @return 线程池信息采集器所依赖的数据源
      */
-    protected abstract ThreadPoolMonitor getThreadPoolMonitor();
+    protected abstract List<ThreadPoolMonitor> getThreadPoolMonitorList();
 
     @Override
     public List<FalconData> getList() {
-        ThreadPoolMonitor threadPoolMonitor = getThreadPoolMonitor();
+        List<ThreadPoolMonitor> threadPoolMonitorList = getThreadPoolMonitorList();
         List<FalconData> falconDataList = new ArrayList<>();
 
-        falconDataList.add(create("_threadPool_active_count", threadPoolMonitor.getActiveCount()));
+        long activeCount = 0;
+        long poolSize = 0;
+        long peakPoolSize = 0;
+        long corePoolSize = 0;
+        long maximumPoolSize = 0;
+        long rejectedCount = 0;
 
-        falconDataList.add(create("_threadPool_pool_size", threadPoolMonitor.getPoolSize()));
+        for (ThreadPoolMonitor threadPoolMonitor : threadPoolMonitorList) {
+            activeCount += threadPoolMonitor.getActiveCount();
+            poolSize += threadPoolMonitor.getPoolSize();
+            peakPoolSize += threadPoolMonitor.getPeakPoolSize();
+            corePoolSize += threadPoolMonitor.getCorePoolSize();
+            maximumPoolSize += threadPoolMonitor.getMaximumPoolSize();
+            rejectedCount += threadPoolMonitor.getRejectedCount();
+        }
 
-        falconDataList.add(create("_threadPool_peak_pool_size", threadPoolMonitor.getPeakPoolSize()));
+        falconDataList.add(create("_threadPool_active_count", activeCount));
 
-        falconDataList.add(create("_threadPool_core_pool_size", threadPoolMonitor.getCorePoolSize()));
+        falconDataList.add(create("_threadPool_pool_size", poolSize));
 
-        falconDataList.add(create("_threadPool_maximum_pool_size", threadPoolMonitor.getMaximumPoolSize()));
+        falconDataList.add(create("_threadPool_peak_pool_size", peakPoolSize));
 
-        long rejectedCount = threadPoolMonitor.getRejectedCount();
+        falconDataList.add(create("_threadPool_core_pool_size", corePoolSize));
+
+        falconDataList.add(create("_threadPool_maximum_pool_size", maximumPoolSize));
+
         falconDataList.add(create("_threadPool_rejected_count", rejectedCount - lastRejectedCount));
         lastRejectedCount = rejectedCount;
 
