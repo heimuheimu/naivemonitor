@@ -75,7 +75,17 @@ public class FalconReporter implements Closeable {
     private ScheduledExecutorService executorService = null;
 
     /**
-     * 构造一个基于 Falcon 系统的监控数据上报服务
+     * 构造一个基于 Falcon 系统的监控数据上报服务，Endpoint 默认为机器名
+     *
+     * @param pushUrl 用于接收监控数据的 Falcon 接口 URL 地址，不允许为 {@code null}
+     * @param falconDataCollectorList 监控数据收集器列表，不允许为 {@code null}
+     */
+    public FalconReporter(String pushUrl, List<FalconDataCollector> falconDataCollectorList) {
+        this (pushUrl, falconDataCollectorList, null);
+    }
+
+    /**
+     * 构造一个基于 Falcon 系统的监控数据上报服务，Endpoint 默认为机器名，并会根据该机器名尝试从别名 Map 中获取对应的别名
      *
      * @param pushUrl 用于接收监控数据的 Falcon 接口 URL 地址，不允许为 {@code null}
      * @param falconDataCollectorList 监控数据收集器列表，不允许为 {@code null}
