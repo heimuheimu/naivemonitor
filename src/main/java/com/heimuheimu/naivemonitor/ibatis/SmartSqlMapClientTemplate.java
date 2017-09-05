@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("SQL_ERROR_EXECUTION_LOGGER");
+    private static final Logger SQL_ERROR_EXECUTION_LOGGER = LoggerFactory.getLogger("SQL_ERROR_EXECUTION_LOGGER");
 
     private static final Logger SQL_SLOW_EXECUTION_LOGGER = LoggerFactory.getLogger("SQL_SLOW_EXECUTION_LOGGER");
 
@@ -104,7 +104,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             return super.queryForObject(statementName, parameterObject);
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Query for object failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Query for object failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
         } finally {
@@ -126,7 +126,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             return super.queryForObject(statementName, parameterObject, resultObject);
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Query for object failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Query for object failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Result object: `" + resultObject + "`.", e);
             throw e;
         } finally {
@@ -157,7 +157,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             return result;
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Query for list failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Query for list failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
         } finally {
@@ -189,7 +189,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             return result;
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Query for list failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Query for list failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Skip results: `" + skipResults + "`. Max results: `"
                     + maxResults + "`.", e);
             throw e;
@@ -216,7 +216,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             return result;
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Query for map failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Query for map failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Key property: `" + keyProperty + "`.", e);
             throw e;
         } finally {
@@ -242,7 +242,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             return result;
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Query for map failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Query for map failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Key property: `" + keyProperty + "`. Value property: `"
                     + valueProperty + "`.", e);
             throw e;
@@ -270,7 +270,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             return super.insert(statementName, parameterObject);
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Insert failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Insert failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
         } finally {
@@ -300,7 +300,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             return updatedRows;
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Update failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Update failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
         } finally {
@@ -323,7 +323,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.onUpdated(requiredRowsAffected);
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Update failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Update failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Required rows affected: `" + requiredRowsAffected
                     + "`.", e);
             throw e;
@@ -354,7 +354,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             return deletedRows;
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Delete failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Delete failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
         } finally {
@@ -377,7 +377,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.onDeleted(requiredRowsAffected);
         } catch (Exception e) {
             sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
-            LOGGER.error("Delete failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
+            SQL_ERROR_EXECUTION_LOGGER.error("Delete failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Required rows affected: `" + requiredRowsAffected
                     + "`.", e);
             throw e;
