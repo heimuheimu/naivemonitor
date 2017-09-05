@@ -72,7 +72,7 @@ public abstract class AbstractExecutionDataCollector extends AbstractFalconDataC
         long peakTps = 0;
         HashMap<Integer, Long> errorCountMap = new HashMap<>();
         long totalExecutionTime = 0;
-        long maxSuccessExecutionTime = 0;
+        long maxExecutionTime = 0;
         for (ExecutionMonitor executionMonitor : executionMonitorList) {
             executionCount += executionMonitor.getTotalCount();
 
@@ -93,9 +93,9 @@ public abstract class AbstractExecutionDataCollector extends AbstractFalconDataC
 
             totalExecutionTime += executionMonitor.getTotalExecutionTime();
 
-            long currentMaxExecutionTime = executionMonitor.getMaxSuccessExecutionTime();
-            executionMonitor.resetMaxSuccessExecutionTime();
-            maxSuccessExecutionTime = maxSuccessExecutionTime < currentMaxExecutionTime ? currentMaxExecutionTime : maxSuccessExecutionTime;
+            long currentMaxExecutionTime = executionMonitor.getMaxExecutionTime();
+            executionMonitor.resetMaxExecutionTime();
+            maxExecutionTime = maxExecutionTime < currentMaxExecutionTime ? currentMaxExecutionTime : maxExecutionTime;
         }
 
         falconDataList.add(create("_tps", (executionCount - lastExecutionCount) / getPeriod()));
@@ -126,7 +126,7 @@ public abstract class AbstractExecutionDataCollector extends AbstractFalconDataC
         lastExecutionCount = executionCount;
         lastTotalExecutionTime = totalExecutionTime;
 
-        falconDataList.add(create("_max_exec_time", maxSuccessExecutionTime));
+        falconDataList.add(create("_max_exec_time", maxExecutionTime));
         return falconDataList;
     }
 }

@@ -44,11 +44,6 @@ public class ExecutionMonitor {
     private final AtomicLong totalCount = new AtomicLong();
 
     /**
-     * 操作执行成功总次数
-     */
-    private final AtomicLong successCount = new AtomicLong();
-
-    /**
      * 操作执行失败总次数 Map，Key 为操作失败错误码，Value 为该错误码对应的失败次数
      */
     private final ConcurrentHashMap<Integer, AtomicLong> errorCountMap = new ConcurrentHashMap<>();
@@ -69,9 +64,9 @@ public class ExecutionMonitor {
     private volatile long currentTpsTimestamp = 0;
 
     /**
-     * 操作执行成功的最大执行时间，单位：纳秒
+     * 操作最大执行时间，单位：纳秒
      */
-    private volatile long maxSuccessExecutionTime = 0;
+    private volatile long maxExecutionTime = 0;
 
     /**
      * 操作总执行时间，单位：纳秒
@@ -79,51 +74,47 @@ public class ExecutionMonitor {
     private final AtomicLong totalExecutionTime = new AtomicLong();
 
     /**
-     * 对执行成功的操作进行监控，执行开始时间应该在操作开始前执行 {@link System#nanoTime()} 方法获取
+     * 对执行完成的操作进行监控，执行开始时间应该在操作开始前执行 {@link System#nanoTime()} 方法获取
      *
      * @param startNanoTime 操作执行开始时间，单位：纳秒
      */
-    public void onExecutedSuccess(long startNanoTime) {
+    public void onExecuted(long startNanoTime) {
         long estimatedTime = System.nanoTime() - startNanoTime;
-        onExecuted(estimatedTime);
-
         //最大执行时间仅使用了 volatile 来保证可见性，并没有保证操作的原子性，极端情况下，真正的最大值可能会被覆盖，但做统计影响不大
-        if (estimatedTime > maxSuccessExecutionTime) {
-            maxSuccessExecutionTime = estimatedTime;
+        if (estimatedTime > maxExecutionTime) {
+            maxExecutionTime = estimatedTime;
         }
 
-        //操作执行成功总次数 +1
-        MonitorUtil.safeAdd(successCount, 1);
+        MonitorUtil.safeAdd(totalCount, 1); //操作执行总次数 +1
+        MonitorUtil.safeAdd(totalExecutionTime, estimatedTime); //操作总执行时间增加
+
+        //计算每秒操作执行次数，非精确计算
+        long currentTimestamp = System.currentTimeMillis();
+        if (currentTimestamp - currentTpsTimestamp <= 1000) {
+            currentTps.incrementAndGet();
+        } else {
+            long currentTpsValue = currentTps.get();
+            currentTps.set(0);
+            currentTpsTimestamp = currentTimestamp;
+            if (currentTpsValue > peakTps) {
+                peakTps = currentTpsValue;
+            }
+        }
     }
 
     /**
-     * 对执行失败的操作进行监控，执行开始时间应该在操作开始前执行 {@link System#nanoTime()} 方法获取
-     *
-     * @param startNanoTime 操作执行开始时间，单位：纳秒
+     * 对执行过程中发生的错误进行监控，失败错误码对应的错误次数 +1，可通过 {@link #getErrorCount(int)} 方法进行错误次数获取
+      *
      * @param errorCode 操作失败错误码，由使用方自行定义
      */
-    public void onExecutedError(long startNanoTime, int errorCode) {
-        onExecutedError(startNanoTime, errorCode, 1);
-    }
-
-    /**
-     * 对执行失败的操作进行监控，执行开始时间应该在操作开始前执行 {@link System#nanoTime()} 方法获取
-     *
-     * @param startNanoTime 操作执行开始时间，单位：纳秒
-     * @param errorCode 操作失败错误码，由使用方自行定义
-     * @param errorCount 该错误码对应的失败次数，单次执行允许增加多次错误码对应的失败次数
-     */
-    public void onExecutedError(long startNanoTime, int errorCode, int errorCount) {
-        long estimatedTime = System.nanoTime() - startNanoTime;
-        onExecuted(estimatedTime);
-
+    public void onError(int errorCode) {
         //操作执行失败总次数 +1
         AtomicLong existedErrorCount = errorCountMap.get(errorCode);
         if (existedErrorCount == null) {
             existedErrorCount = new AtomicLong();
             errorCountMap.put(errorCode, existedErrorCount);
         }
-        MonitorUtil.safeAdd(existedErrorCount, errorCount);
+        MonitorUtil.safeAdd(existedErrorCount, 1);
     }
 
     /**
@@ -133,15 +124,6 @@ public class ExecutionMonitor {
      */
     public long getTotalCount() {
         return totalCount.get();
-    }
-
-    /**
-     * 获得操作执行成功总次数
-     *
-     * @return 操作执行成功总次数
-     */
-    public long getSuccessCount() {
-        return successCount.get();
     }
 
     /**
@@ -173,8 +155,8 @@ public class ExecutionMonitor {
      *
      * @return 操作执行成功的最大执行时间，单位：纳秒
      */
-    public long getMaxSuccessExecutionTime() {
-        return maxSuccessExecutionTime;
+    public long getMaxExecutionTime() {
+        return maxExecutionTime;
     }
 
     /**
@@ -187,10 +169,10 @@ public class ExecutionMonitor {
     }
 
     /**
-     * 重置操作执行成功的最大执行时间，单位：纳秒
+     * 重置操作最大执行时间，单位：纳秒
      */
-    public void resetMaxSuccessExecutionTime() {
-        maxSuccessExecutionTime = 0;
+    public void resetMaxExecutionTime() {
+        maxExecutionTime = 0;
     }
 
     /**
@@ -200,34 +182,15 @@ public class ExecutionMonitor {
         peakTps = 0;
     }
 
-    private void onExecuted(long estimatedTime) {
-        MonitorUtil.safeAdd(totalCount, 1); //操作执行总次数 +1
-        MonitorUtil.safeAdd(totalExecutionTime, estimatedTime); //操作总执行时间增加
-
-        //计算每秒操作执行次数，非精确计算
-        long currentTimestamp = System.currentTimeMillis();
-        if (currentTimestamp - currentTpsTimestamp <= 1000) {
-            currentTps.incrementAndGet();
-        } else {
-            long currentTpsValue = currentTps.get();
-            currentTps.set(0);
-            currentTpsTimestamp = currentTimestamp;
-            if (currentTpsValue > peakTps) {
-                peakTps = currentTpsValue;
-            }
-        }
-    }
-
     @Override
     public String toString() {
         return "ExecutionMonitor{" +
                 "totalCount=" + totalCount +
-                ", successCount=" + successCount +
                 ", errorCountMap=" + errorCountMap +
                 ", peakTps=" + peakTps +
                 ", currentTps=" + currentTps +
                 ", currentTpsTimestamp=" + currentTpsTimestamp +
-                ", maxSuccessExecutionTime=" + maxSuccessExecutionTime +
+                ", maxExecutionTime=" + maxExecutionTime +
                 ", totalExecutionTime=" + totalExecutionTime +
                 '}';
     }

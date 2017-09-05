@@ -21,7 +21,26 @@
             <version>1.7.5</version>
             <scope>provided</scope>
         </dependency>
+        <!-- Spring & iBatis Dependence -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>3.0.0.RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ibatis</groupId>
+            <artifactId>ibatis-sqlmap</artifactId>
+            <version>2.3.4.726</version>
+        </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>snapshots</id>
+            <url>http://192.168.16.174:7071/nexus/content/repositories/snapshots</url>
+        </repository>
+    </distributionManagement>
 
     <profiles>
         <profile>
