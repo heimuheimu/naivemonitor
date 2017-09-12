@@ -44,9 +44,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
 
-    private static final Logger SQL_ERROR_EXECUTION_LOGGER = LoggerFactory.getLogger("SQL_ERROR_EXECUTION_LOGGER");
+    private static final Logger SQL_ERROR_EXECUTION_LOGGER = LoggerFactory.getLogger("NAIVESQL_ERROR_EXECUTION_LOGGER");
 
-    private static final Logger SQL_SLOW_EXECUTION_LOGGER = LoggerFactory.getLogger("SQL_SLOW_EXECUTION_LOGGER");
+    private static final Logger SQL_SLOW_EXECUTION_LOGGER = LoggerFactory.getLogger("NAIVESQL_SLOW_EXECUTION_LOGGER");
 
     /**
      * 数据库名称
