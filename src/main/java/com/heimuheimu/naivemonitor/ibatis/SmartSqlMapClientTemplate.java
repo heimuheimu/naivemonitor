@@ -25,7 +25,7 @@
 package com.heimuheimu.naivemonitor.ibatis;
 
 import com.heimuheimu.naivemonitor.monitor.SqlExecutionMonitor;
-import com.heimuheimu.naivemonitor.monitor.factory.SqlExecutionMonitorFactory;
+import com.heimuheimu.naivemonitor.monitor.factory.NaiveSqlExecutionMonitorFactory;
 import com.ibatis.sqlmap.client.SqlMapClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +75,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
         super(sqlMapClient);
         this.dbName = dbName;
         this.slowExecutionThreshold = TimeUnit.NANOSECONDS.convert(slowExecutionThreshold, TimeUnit.MILLISECONDS);
-        this.sqlExecutionMonitor = SqlExecutionMonitorFactory.get(dbName);
+        this.sqlExecutionMonitor = NaiveSqlExecutionMonitorFactory.get(dbName);
     }
 
     /**
@@ -90,7 +90,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
         super(dataSource, sqlMapClient);
         this.dbName = dbName;
         this.slowExecutionThreshold = TimeUnit.NANOSECONDS.convert(slowExecutionThreshold, TimeUnit.MILLISECONDS);
-        this.sqlExecutionMonitor = SqlExecutionMonitorFactory.get(dbName);
+        this.sqlExecutionMonitor = NaiveSqlExecutionMonitorFactory.get(dbName);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
         try {
             return super.queryForObject(statementName, parameterObject);
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Query for object failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
@@ -112,7 +112,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[queryForObject] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject);
@@ -126,7 +126,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
         try {
             return super.queryForObject(statementName, parameterObject, resultObject);
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Query for object failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Result object: `" + resultObject + "`.", e);
             throw e;
@@ -134,7 +134,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[queryForObject] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`. Result object: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject, resultObject);
@@ -157,7 +157,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.onQueryList(resultSize);
             return result;
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Query for list failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
@@ -165,7 +165,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[queryForList] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`. Result size: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject, resultSize);
@@ -189,7 +189,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.onQueryList(resultSize);
             return result;
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Query for list failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Skip results: `" + skipResults + "`. Max results: `"
                     + maxResults + "`.", e);
@@ -198,7 +198,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[queryForList] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`. Result size: `{}`. Skip results: `{}`. Max results: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject, resultSize, skipResults, maxResults);
@@ -216,7 +216,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.onQueryList(resultSize);
             return result;
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Query for map failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Key property: `" + keyProperty + "`.", e);
             throw e;
@@ -224,7 +224,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[queryForMap] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`. Key property: `{}`. Result size: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject, keyProperty, resultSize);
@@ -242,7 +242,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.onQueryList(resultSize);
             return result;
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Query for map failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Key property: `" + keyProperty + "`. Value property: `"
                     + valueProperty + "`.", e);
@@ -251,7 +251,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[queryForMap] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`. Key property: `{}`. Value property: `{}`. Result size: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject, keyProperty, valueProperty, resultSize);
@@ -270,7 +270,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
         try {
             return super.insert(statementName, parameterObject);
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Insert failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
@@ -278,7 +278,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[insert] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject);
@@ -300,7 +300,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.onUpdated(updatedRows);
             return updatedRows;
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Update failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
@@ -308,7 +308,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[update] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`. Updated rows: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject, updatedRows);
@@ -323,7 +323,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             super.update(statementName, parameterObject, requiredRowsAffected);
             sqlExecutionMonitor.onUpdated(requiredRowsAffected);
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Update failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Required rows affected: `" + requiredRowsAffected
                     + "`.", e);
@@ -332,7 +332,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[update] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`. Required rows affected: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject, requiredRowsAffected);
@@ -354,7 +354,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.onDeleted(deletedRows);
             return deletedRows;
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Delete failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`.", e);
             throw e;
@@ -362,7 +362,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[delete] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`. Deleted rows: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject, deletedRows);
@@ -377,7 +377,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             super.delete(statementName, parameterObject, requiredRowsAffected);
             sqlExecutionMonitor.onDeleted(requiredRowsAffected);
         } catch (Exception e) {
-            sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
+            sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR);
             SQL_ERROR_EXECUTION_LOGGER.error("Delete failed: `" + e.getMessage() + "`. Db name: `" + dbName + "`. Statement name: `"
                     + statementName + "`. Parameter: `" + parameterObject + "`. Required rows affected: `" + requiredRowsAffected
                     + "`.", e);
@@ -386,7 +386,7 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
             sqlExecutionMonitor.getExecutionMonitor().onExecuted(startTime);
             long executedNanoTime = System.nanoTime() - startTime;
             if (executedNanoTime > slowExecutionThreshold) {
-                sqlExecutionMonitor.getExecutionMonitor().onError(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
+                sqlExecutionMonitor.getExecutionMonitor().onError(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION);
                 SQL_SLOW_EXECUTION_LOGGER.error("[delete] Cost: `{}ns ({})ms`. Db name: `{}`. Statement name: `{}`. Parameter: `{}`. Required rows affected: `{}`.",
                         executedNanoTime, TimeUnit.MILLISECONDS.convert(executedNanoTime, TimeUnit.NANOSECONDS), dbName,
                         statementName, parameterObject, requiredRowsAffected);

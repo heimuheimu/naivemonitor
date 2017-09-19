@@ -37,9 +37,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author heimuheimu
  * @ThreadSafe
  */
-public class SqlExecutionMonitorFactory {
+public class NaiveSqlExecutionMonitorFactory {
 
-    private SqlExecutionMonitorFactory() {
+    private NaiveSqlExecutionMonitorFactory() {
         //prevent construct this class
     }
 

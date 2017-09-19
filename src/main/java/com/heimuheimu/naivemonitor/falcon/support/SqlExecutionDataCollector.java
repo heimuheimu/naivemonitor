@@ -27,7 +27,7 @@ package com.heimuheimu.naivemonitor.falcon.support;
 import com.heimuheimu.naivemonitor.falcon.FalconData;
 import com.heimuheimu.naivemonitor.monitor.ExecutionMonitor;
 import com.heimuheimu.naivemonitor.monitor.SqlExecutionMonitor;
-import com.heimuheimu.naivemonitor.monitor.factory.SqlExecutionMonitorFactory;
+import com.heimuheimu.naivemonitor.monitor.factory.NaiveSqlExecutionMonitorFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,8 +45,8 @@ public class SqlExecutionDataCollector extends AbstractExecutionDataCollector {
 
     static {
         ERROR_METRIC_SUFFIX_MAP = new HashMap<>();
-        ERROR_METRIC_SUFFIX_MAP.put(SqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR, "_error");
-        ERROR_METRIC_SUFFIX_MAP.put(SqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION, "_slow_execution");
+        ERROR_METRIC_SUFFIX_MAP.put(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SQL_ERROR, "_error");
+        ERROR_METRIC_SUFFIX_MAP.put(NaiveSqlExecutionMonitorFactory.ERROR_CODE_SLOW_EXECUTION, "_slow_execution");
     }
 
     /**
@@ -76,7 +76,7 @@ public class SqlExecutionDataCollector extends AbstractExecutionDataCollector {
     public SqlExecutionDataCollector(String moduleName, String dbName) {
         this.moduleName = moduleName;
         this.collectorName = dbName + "_sql";
-        this.sqlExecutionMonitor = SqlExecutionMonitorFactory.get(dbName);
+        this.sqlExecutionMonitor = NaiveSqlExecutionMonitorFactory.get(dbName);
         executionMonitorList = new ArrayList<>();
         executionMonitorList.add(sqlExecutionMonitor.getExecutionMonitor());
     }

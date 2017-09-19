@@ -33,9 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author heimuheimu
  */
-public class ExecutionMonitorFactory {
+public class NaiveExecutionMonitorFactory {
 
-    private ExecutionMonitorFactory() {
+    private NaiveExecutionMonitorFactory() {
         //private constructor
     }
 
