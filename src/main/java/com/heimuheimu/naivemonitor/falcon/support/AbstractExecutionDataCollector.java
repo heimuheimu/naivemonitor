@@ -100,7 +100,7 @@ public abstract class AbstractExecutionDataCollector extends AbstractFalconDataC
 
         falconDataList.add(create("_tps", (executionCount - lastExecutionCount) / getPeriod()));
 
-        falconDataList.add(create("_peak_tps", (executionCount - lastExecutionCount) / getPeriod()));
+        falconDataList.add(create("_peak_tps", peakTps));
 
         if (errorMetricSuffixMap != null && !errorMetricSuffixMap.isEmpty()) {
             for (Integer errorCode : errorMetricSuffixMap.keySet()) {
