@@ -25,6 +25,7 @@
 package com.heimuheimu.naivemonitor.ibatis;
 
 import com.heimuheimu.naivemonitor.monitor.SqlExecutionMonitor;
+import com.heimuheimu.naivemonitor.monitor.factory.SqlExecutionMonitorFactory;
 import com.ibatis.sqlmap.client.SqlMapClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

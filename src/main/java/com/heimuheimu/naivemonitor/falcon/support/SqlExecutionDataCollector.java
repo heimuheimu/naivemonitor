@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-package com.heimuheimu.naivemonitor.ibatis;
+package com.heimuheimu.naivemonitor.falcon.support;
 
 import com.heimuheimu.naivemonitor.falcon.FalconData;
-import com.heimuheimu.naivemonitor.falcon.support.AbstractExecutionDataCollector;
 import com.heimuheimu.naivemonitor.monitor.ExecutionMonitor;
 import com.heimuheimu.naivemonitor.monitor.SqlExecutionMonitor;
+import com.heimuheimu.naivemonitor.monitor.factory.SqlExecutionMonitorFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;

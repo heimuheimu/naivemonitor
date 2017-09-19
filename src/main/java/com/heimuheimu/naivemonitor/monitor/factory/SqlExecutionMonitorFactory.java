@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.heimuheimu.naivemonitor.ibatis;
+package com.heimuheimu.naivemonitor.monitor.factory;
 
 import com.heimuheimu.naivemonitor.monitor.SqlExecutionMonitor;
 
