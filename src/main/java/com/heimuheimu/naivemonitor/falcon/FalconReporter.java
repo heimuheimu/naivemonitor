@@ -24,14 +24,13 @@
 
 package com.heimuheimu.naivemonitor.falcon;
 
+import com.heimuheimu.naivemonitor.http.NaiveHttpPost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -141,7 +140,7 @@ public class FalconReporter implements Closeable {
                 @Override
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r);
-                    t.setName("FalconReporter-" + threadNumber.getAndIncrement());
+                    t.setName("naivemonitor-falcon-reporter-" + threadNumber.getAndIncrement());
                     t.setDaemon(true);
                     if (t.getPriority() != Thread.NORM_PRIORITY)
                         t.setPriority(Thread.NORM_PRIORITY);
@@ -207,36 +206,22 @@ public class FalconReporter implements Closeable {
             }
 
             if (!pushDataList.isEmpty()) {
-                HttpURLConnection urlConnection = null;
                 try {
                     for (FalconData pushData : pushDataList) { //所有采集到的监控数据重新设置 endpoint
                         pushData.setEndpoint(endpoint);
                     }
                     String pushJsonData = toJson(pushDataList);
 
-                    URL url = new URL(pushUrl);
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setConnectTimeout(5000);
-                    urlConnection.setReadTimeout(5000);
-                    urlConnection.setRequestMethod("POST");
-                    urlConnection.setDoOutput(true);
+                    NaiveHttpPost httpPost = new NaiveHttpPost(pushUrl, 5000);
+                    httpPost.doPost(pushJsonData);
 
-                    DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-                    wr.writeBytes(pushJsonData);
-                    wr.flush();
-                    wr.close();
-
-                    int responseCode = urlConnection.getResponseCode();
-                    if (responseCode != 200) {
-                        LOGGER.error("Push falcon data list failed. Error response code: `{}`. Url: `{}`.",
+                    int responseCode = httpPost.getUrlConnection().getResponseCode();
+                    if (responseCode != HttpURLConnection.HTTP_OK) {
+                        LOGGER.error("Push falcon data list failed: `error response code [{}]`. Url: `{}`.",
                                 responseCode, pushUrl);
                     }
                 } catch (Exception e) {
                     LOGGER.error("Push falcon data list failed: `" + e.getMessage() + "`. Url: `" + pushUrl + "`.", e);
-                } finally {
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
-                    }
                 }
             }
         }
