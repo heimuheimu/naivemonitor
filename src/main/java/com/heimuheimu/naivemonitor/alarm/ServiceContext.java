@@ -24,6 +24,8 @@
 
 package com.heimuheimu.naivemonitor.alarm;
 
+import com.heimuheimu.naivemonitor.MonitorUtil;
+
 import java.util.Objects;
 
 /**
@@ -39,9 +41,9 @@ public class ServiceContext {
     private String name = "";
 
     /**
-     * 调用该服务的主机名称
+     * 调用该服务的主机名称，默认当前 JVM 运行的机器名
      */
-    private String host = "";
+    private String host = MonitorUtil.getLocalHostName();
 
     /**
      * 调用该服务的项目名称
@@ -72,7 +74,7 @@ public class ServiceContext {
     }
 
     /**
-     * 获得调用该服务的主机名称
+     * 获得调用该服务的主机名称，如果未进行过设置，将返回当前 JVM 运行的机器名
      *
      * @return 调用该服务的主机名称
      */
@@ -81,7 +83,7 @@ public class ServiceContext {
     }
 
     /**
-     * 设置调用该服务的主机名称
+     * 设置调用该服务的主机名称，如果不进行设置，默认为当前 JVM 运行的机器名
      *
      * @param host 调用该服务的主机名称
      */

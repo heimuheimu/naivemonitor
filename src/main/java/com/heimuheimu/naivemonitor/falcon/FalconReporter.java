@@ -24,13 +24,13 @@
 
 package com.heimuheimu.naivemonitor.falcon;
 
+import com.heimuheimu.naivemonitor.MonitorUtil;
 import com.heimuheimu.naivemonitor.http.NaiveHttpPost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +56,7 @@ public class FalconReporter implements Closeable {
     /**
      * 当前机器名
      */
-    private final String endpoint;
+    private final String endpoint = MonitorUtil.getLocalHostName();
 
     /**
      * 用于接收监控数据的 Falcon 接口 URL 地址
@@ -95,20 +95,6 @@ public class FalconReporter implements Closeable {
         if (falconDataCollectorList == null || falconDataCollectorList.isEmpty()) {
             LOGGER.error("Construct FalconReporter failed: `falconDataCollectorList is null`. Url: `" + pushUrl + "`.");
             throw new IllegalArgumentException("Construct FalconReporter failed: `falconDataCollectorList is null`. Url: `" + pushUrl + "`.");
-        }
-        String endpoint = "unknown";
-        try {
-            InetAddress localInetAddress = InetAddress.getLocalHost();
-            String hostName = localInetAddress.getHostName();
-            if (endpointAliasMap != null && endpointAliasMap.containsKey(hostName)) {
-                endpoint = endpointAliasMap.get(hostName);
-            } else {
-                endpoint = hostName;
-            }
-        } catch (Exception e) {//ignore exception,should not happen
-            LOGGER.error("Get endpoint failed.", e);
-        } finally {
-            this.endpoint = endpoint;
         }
         this.pushUrl = pushUrl;
         this.falconDataCollectorList = falconDataCollectorList;

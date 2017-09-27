@@ -24,6 +24,10 @@
 
 package com.heimuheimu.naivemonitor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -33,6 +37,21 @@ import java.util.concurrent.atomic.AtomicLong;
  * @ThreadSafe
  */
 public class MonitorUtil {
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(MonitorUtil.class);
+    
+    private static final String LOCAL_HOST_NAME;
+
+    static {
+        String endpoint = "InetAddress.getLocalHost().getHostName() failed.";
+        try {
+            endpoint = InetAddress.getLocalHost().getHostName();
+        } catch (Exception e) {//should not happen
+            LOGGER.error("Get local host name failed.", e);
+        } finally {
+            LOCAL_HOST_NAME = endpoint;
+        }
+    }
 
     private MonitorUtil() {
         //prevent construct this class
@@ -55,4 +74,12 @@ public class MonitorUtil {
         }
     }
 
+    /**
+     * 获得当前 JVM 运行的机器名
+     *
+     * @return 当前 JVM 运行的机器名
+     */
+    public static String getLocalHostName() {
+        return LOCAL_HOST_NAME;
+    }
 }
