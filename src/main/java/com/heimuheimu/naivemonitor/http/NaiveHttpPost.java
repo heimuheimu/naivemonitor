@@ -28,9 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.*;
 import java.util.Map;
 
 /**
@@ -77,16 +75,54 @@ public class NaiveHttpPost {
      * @throws IOException 如果在创建 {@link HttpURLConnection} 过程中发生错误，将抛出此异常
      */
     public NaiveHttpPost(String url, int timeout) throws IOException {
+        this(url, timeout, null);
+    }
+
+    /**
+     * 构造一个 Http Post 请求
+     *
+     * <p>
+     *     如果本机无法访问公网，可通过 Http(Https) 代理的方式来实现公网访问，例如使用 Tinyproxy，更多资料请查阅：
+     *     <a href="https://tinyproxy.github.io">https://tinyproxy.github.io</a>
+     * </p>
+     *
+     * @param url Post 请求 URL 地址
+     * @param timeout 连接和操作超时时间，单位：毫秒
+     * @param proxyHost Http 代理地址，由主机名和端口号组成，用 ":" 进行分割，例如："192.168.1.1:9900"，允许为 {@code null} 或空字符串
+     * @throws IllegalArgumentException 如果 TCP 代理地址不符合规则，将抛出此异常
+     * @throws IOException 如果在创建 {@link HttpURLConnection} 过程中发生错误，将抛出此异常
+     */
+    public NaiveHttpPost(String url, int timeout, String proxyHost) throws IllegalArgumentException, IOException {
+        Proxy proxy = null;
+        if (proxyHost != null && !proxyHost.trim().isEmpty()) {
+            String hostname;
+            int port;
+            try {
+                String[] hostParts = proxyHost.split(":");
+                hostname = hostParts[0];
+                port = Integer.parseInt(hostParts[1]);
+                proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hostname, port));
+            } catch (Exception e) {
+                LOGGER.error("Create NaiveHttpPost failed: `invalid proxy host`. Url: `"
+                        + url + "`. Timeout: `" + timeout + "`. Proxy host: `" + proxyHost + "`.", e);
+                throw new IllegalArgumentException("Create NaiveHttpPost failed: `invalid proxy host`. Url: `"
+                        + url + "`. Timeout: `" + timeout + "`. Proxy host: `" + proxyHost + "`.", e);
+            }
+        }
         try {
             this.url = url;
-            this.urlConnection = (HttpURLConnection) new URL(url).openConnection();
+            if (proxy == null) {
+                this.urlConnection = (HttpURLConnection) new URL(url).openConnection();
+            } else {
+                this.urlConnection = (HttpURLConnection) new URL(url).openConnection(proxy);
+            }
             this.urlConnection.setConnectTimeout(timeout);
             this.urlConnection.setReadTimeout(timeout);
             this.urlConnection.setRequestMethod("POST");
             urlConnection.setDoOutput(true);
         } catch (Exception e) {
             LOGGER.error("Create NaiveHttpPost failed: `" + e.getMessage() + "`. Url: `" + url + "`. Timeout: `"
-                    + timeout + "`.", e);
+                    + timeout + "`. Proxy host: `" + proxyHost + "`.", e);
             throw e;
         }
     }
