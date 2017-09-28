@@ -77,6 +77,10 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
      *     https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1
      * </a>
      *
+     * <p>
+     *     如果 url 设置为 {@code null} 或空，{@link #send(ServiceAlarmMessage)} 只进行 WARN 级别日志打印，不进行实际发送，并永远返回 {@code false}。
+     * </p>
+     *
      * @param url url 钉钉消息发送 URL 地址
      */
     public DingTalkServiceAlarmMessageNotifier(String url) {
@@ -88,8 +92,15 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
      * <a href="https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1">
      *     https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1
      * </a>
-     * <br>如果本机无法访问公网，可通过 Http(Https) 代理的方式来实现钉钉报警，例如使用 Tinyproxy，更多资料请查阅：
-     * <a href="https://tinyproxy.github.io">https://tinyproxy.github.io</a>
+     *
+     * <p>
+     *     如果 url 设置为 {@code null} 或空，{@link #send(ServiceAlarmMessage)} 只进行 WARN 级别日志打印，不进行实际发送，并永远返回 {@code false}。
+     * </p>
+     *
+     * <p>
+     *     如果本机无法访问公网，可通过 Http(Https) 代理的方式来实现钉钉报警，例如使用 Tinyproxy，更多资料请查阅：
+     *     <a href="https://tinyproxy.github.io">https://tinyproxy.github.io</a>
+     * </p>
      *
      * @param url 钉钉消息发送 URL 地址
      * @param proxyHost Http 代理地址，由主机名和端口号组成，用 ":" 进行分割，例如："192.168.1.1:9900"，允许为 {@code null} 或空字符串
@@ -104,10 +115,16 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
      *     https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1
      * </a>
      *
-     * <p>如果本机无法访问公网，可通过 Http(Https) 代理的方式来实现钉钉报警，例如使用 Tinyproxy，更多资料请查阅：
-     * <a href="https://tinyproxy.github.io">https://tinyproxy.github.io</a></p>
+     * <p>
+     *     如果 url 设置为 {@code null} 或空，{@link #send(ServiceAlarmMessage)} 只进行 WARN 级别日志打印，不进行实际发送，并永远返回 {@code false}。
+     * </p>
      *
-     * @param url 钉钉消息发送 URL 地址
+     * <p>
+     *     如果本机无法访问公网，可通过 Http(Https) 代理的方式来实现钉钉报警，例如使用 Tinyproxy，更多资料请查阅：
+     *     <a href="https://tinyproxy.github.io">https://tinyproxy.github.io</a>
+     * </p>
+     *
+     * @param url 钉钉消息发送 URL 地址，允许为 {@code null} 或空
      * @param proxyHost Http 代理地址，由主机名和端口号组成，用 ":" 进行分割，例如："192.168.1.1:9900"，允许为 {@code null} 或空字符串
      * @param timeout 钉钉消息发送超时时间，单位：毫秒，不允许小于等于 0
      * @param crashingImageUrl 在报警消息发送时，服务仍存在不可用时使用的图片地址，如果不需要，则设置 {@code null} 或空字符串
@@ -123,24 +140,29 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
 
     @Override
     public boolean send(ServiceAlarmMessage serviceAlarmMessage) {
-        long startTime = System.currentTimeMillis();
-        try {
-            NaiveHttpPost post = new NaiveHttpPost(url, timeout, proxyHost);
-            post.getUrlConnection().setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            String responseText = post.doPost(getPostBody(serviceAlarmMessage));
-            boolean isSuccess = isSuccess(responseText);
-            if (isSuccess) {
-                LOGGER.info("Send ServiceAlarmMessage to DingTalk success. Cost: `{} ms`. ServiceAlarmMessage: `{}`. Url: `{}`. Proxy host: `{}`. Timeout: `{}`. CrashingImageUrl: `{}`. RecoveredImageUrl: `{}`.",
-                        System.currentTimeMillis() - startTime, serviceAlarmMessage, url, proxyHost, timeout, crashingImageUrl, recoveredImageUrl);
-            } else {
-                LOGGER.error("Send ServiceAlarmMessage to DingTalk failed. Cost: `{} ms`. ResponseText: `{}`. ServiceAlarmMessage: `{}`. Url: `{}`. Proxy host: `{}`. Timeout: `{}`. CrashingImageUrl: `{}`. RecoveredImageUrl: `{}`.",
-                        System.currentTimeMillis() - startTime, responseText, serviceAlarmMessage, url, proxyHost, timeout, crashingImageUrl, recoveredImageUrl);
+        if (url != null && !url.isEmpty()) {
+            long startTime = System.currentTimeMillis();
+            try {
+                NaiveHttpPost post = new NaiveHttpPost(url, timeout, proxyHost);
+                post.getUrlConnection().setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                String responseText = post.doPost(getPostBody(serviceAlarmMessage));
+                boolean isSuccess = isSuccess(responseText);
+                if (isSuccess) {
+                    LOGGER.info("Send ServiceAlarmMessage to DingTalk success. Cost: `{} ms`. ServiceAlarmMessage: `{}`. Url: `{}`. Proxy host: `{}`. Timeout: `{}`. CrashingImageUrl: `{}`. RecoveredImageUrl: `{}`.",
+                            System.currentTimeMillis() - startTime, serviceAlarmMessage, url, proxyHost, timeout, crashingImageUrl, recoveredImageUrl);
+                } else {
+                    LOGGER.error("Send ServiceAlarmMessage to DingTalk failed. Cost: `{} ms`. ResponseText: `{}`. ServiceAlarmMessage: `{}`. Url: `{}`. Proxy host: `{}`. Timeout: `{}`. CrashingImageUrl: `{}`. RecoveredImageUrl: `{}`.",
+                            System.currentTimeMillis() - startTime, responseText, serviceAlarmMessage, url, proxyHost, timeout, crashingImageUrl, recoveredImageUrl);
+                }
+                return isSuccess;
+            } catch (Exception e) {
+                LOGGER.error("Send ServiceAlarmMessage to DingTalk failed. Cost: `" + (System.currentTimeMillis() - startTime)
+                        + " ms`. ServiceAlarmMessage: `" + serviceAlarmMessage + "`. Url: `" + url + "`. Proxy host: `" + proxyHost + "`. Timeout: `" + timeout
+                        + "`. CrashingImageUrl: `" + crashingImageUrl + "`. RecoveredImageUrl: `" + recoveredImageUrl + "`.", e);
+                return false;
             }
-            return isSuccess;
-        } catch (Exception e) {
-            LOGGER.error("Send ServiceAlarmMessage to DingTalk failed. Cost: `" + (System.currentTimeMillis() - startTime)
-                    + " ms`. ServiceAlarmMessage: `" + serviceAlarmMessage + "`. Url: `" + url + "`. Proxy host: `" + proxyHost + "`. Timeout: `" + timeout
-                    + "`. CrashingImageUrl: `" + crashingImageUrl + "`. RecoveredImageUrl: `" + recoveredImageUrl + "`.", e);
+        } else {
+            LOGGER.warn("DingTalkServiceAlarmMessageNotifier is inactive. ServiceAlarmMessage: `" + serviceAlarmMessage + "`.");
             return false;
         }
     }
