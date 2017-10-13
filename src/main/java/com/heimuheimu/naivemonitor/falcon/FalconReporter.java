@@ -56,7 +56,7 @@ public class FalconReporter implements Closeable {
     /**
      * 当前机器名
      */
-    private final String endpoint = MonitorUtil.getLocalHostName();
+    private final String endpoint;
 
     /**
      * 用于接收监控数据的 Falcon 接口 URL 地址
@@ -98,6 +98,11 @@ public class FalconReporter implements Closeable {
         }
         this.pushUrl = pushUrl;
         this.falconDataCollectorList = falconDataCollectorList;
+        String endpoint = MonitorUtil.getLocalHostName();
+        if (endpointAliasMap != null && endpointAliasMap.containsKey(endpoint)) {
+            endpoint = endpointAliasMap.get(endpoint);
+        }
+        this.endpoint = endpoint;
     }
 
     /**
