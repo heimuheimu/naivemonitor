@@ -29,7 +29,9 @@ import com.heimuheimu.naivemonitor.MonitorUtil;
 import java.util.Objects;
 
 /**
- * 服务及服务所在的运行环境信息
+ * 服务及服务所在的运行环境信息。
+ *
+ * <p><strong>说明：</strong>{@code ServiceContext} 类是非线程安全的，不允许多个线程使用同一个实例。</p>
  *
  * @author heimuheimu
  */
@@ -56,7 +58,7 @@ public class ServiceContext {
     private String remoteHost = "";
 
     /**
-     * 获得服务名称
+     * 获得服务名称。
      *
      * @return 服务名称
      */
@@ -65,7 +67,7 @@ public class ServiceContext {
     }
 
     /**
-     * 设置服务名称
+     * 设置服务名称。
      *
      * @param name 服务名称
      */
@@ -74,7 +76,7 @@ public class ServiceContext {
     }
 
     /**
-     * 获得调用该服务的主机名称，如果未进行过设置，将返回当前 JVM 运行的机器名
+     * 获得调用该服务的主机名称，如果未进行过设置，将返回当前 JVM 运行的机器名。
      *
      * @return 调用该服务的主机名称
      */
@@ -83,7 +85,7 @@ public class ServiceContext {
     }
 
     /**
-     * 设置调用该服务的主机名称，如果不进行设置，默认为当前 JVM 运行的机器名
+     * 设置调用该服务的主机名称，如果不进行设置，默认为当前 JVM 运行的机器名。
      *
      * @param host 调用该服务的主机名称
      */
@@ -92,7 +94,7 @@ public class ServiceContext {
     }
 
     /**
-     * 获得调用该服务的项目名称
+     * 获得调用该服务的项目名称。
      *
      * @return 调用该服务的项目名称
      */
@@ -101,7 +103,7 @@ public class ServiceContext {
     }
 
     /**
-     * 设置调用该服务的项目名称
+     * 设置调用该服务的项目名称。
      *
      * @param project 调用该服务的项目名称
      */
@@ -110,7 +112,7 @@ public class ServiceContext {
     }
 
     /**
-     * 获得提供该服务的主机名称，如果为本地服务，值为空
+     * 获得提供该服务的主机名称，如果为本地服务，值为空。
      *
      * @return 提供该服务的主机名称，如果为本地服务，值为空
      */
@@ -119,7 +121,7 @@ public class ServiceContext {
     }
 
     /**
-     * 设置提供该服务的主机名称，如果为本地服务，不需要进行设置
+     * 设置提供该服务的主机名称，如果为本地服务，不需要进行设置。
      *
      * @param remoteHost 提供该服务的主机名称，如果为本地服务，不需要进行设置
      */
