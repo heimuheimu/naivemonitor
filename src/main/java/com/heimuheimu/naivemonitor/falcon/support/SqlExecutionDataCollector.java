@@ -84,7 +84,7 @@ public class SqlExecutionDataCollector extends AbstractExecutionDataCollector {
 
     @Override
     public int getPeriod() {
-        return 15;
+        return 30;
     }
 
     @Override
