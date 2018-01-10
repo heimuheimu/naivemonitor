@@ -24,8 +24,8 @@
 
 package com.heimuheimu.naivemonitor.falcon;
 
-import com.heimuheimu.naivemonitor.MonitorUtil;
 import com.heimuheimu.naivemonitor.http.NaiveHttpPost;
+import com.heimuheimu.naivemonitor.util.MonitorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

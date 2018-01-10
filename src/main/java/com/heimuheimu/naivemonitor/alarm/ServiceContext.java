@@ -24,7 +24,7 @@
 
 package com.heimuheimu.naivemonitor.alarm;
 
-import com.heimuheimu.naivemonitor.MonitorUtil;
+import com.heimuheimu.naivemonitor.util.MonitorUtil;
 
 import java.util.Objects;
 

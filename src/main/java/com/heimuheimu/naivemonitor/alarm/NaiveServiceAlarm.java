@@ -34,7 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@code NaiveServiceAlarm} 在服务不可用或从不可用状态恢复时进行实时通知。
+ * 在服务不可用或从不可用状态恢复时，使用 {@code NaiveServiceAlarm} 进行实时通知。
  *
  * <p><strong>说明：</strong>{@code NaiveServiceAlarm} 类是线程安全的，可在多个线程中使用同一个实例。</p>
  *

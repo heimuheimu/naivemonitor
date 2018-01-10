@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.heimuheimu.naivemonitor;
+package com.heimuheimu.naivemonitor.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * NaiveAsync 项目使用的工具类。
+ * NaiveMonitor 项目使用的工具类。
  *
  * @author heimuheimu
  */

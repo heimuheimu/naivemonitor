@@ -24,7 +24,7 @@
 
 package com.heimuheimu.naivemonitor.monitor;
 
-import com.heimuheimu.naivemonitor.MonitorUtil;
+import com.heimuheimu.naivemonitor.util.MonitorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
