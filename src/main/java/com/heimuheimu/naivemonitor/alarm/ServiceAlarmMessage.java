@@ -28,8 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * 服务不可用或从不可用状态恢复的报警消息
- * <br>注意：当前实现为非线程安全
+ * 服务不可用或从不可用状态恢复的报警消息。
+ *
+ * <p><strong>说明：</strong>{@code ServiceAlarmMessage} 类是非线程安全的，不允许多个线程使用同一个实例。</p>
  *
  * @author heimuheimu
  */
@@ -76,7 +77,7 @@ public class ServiceAlarmMessage {
     private final Map<String, Integer> crashingRemoteHostMap = new HashMap<>();
 
     /**
-     * 构造一个服务不可用或从不可用状态恢复的报警消息
+     * 构造一个 {@code ServiceAlarmMessage} 实例。
      *
      * @param name 服务名称
      * @param host 调用该服务的主机名称
@@ -89,7 +90,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 当该服务变成不可用时，调用此方法，进行报警信息拼装
+     * 当该服务变成不可用时，调用此方法，进行报警信息拼装。
      *
      * @param remoteHost 服务提供方主机名称，如果为本地服务，则为 {@code null} 或空字符串
      */
@@ -102,7 +103,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 当该服务从不可用状态恢复时，调用此方法，进行报警信息拼装
+     * 当该服务从不可用状态恢复时，调用此方法，进行报警信息拼装。
      *
      * @param remoteHost 服务提供方主机名称，如果为本地服务，则为 {@code null} 或空字符串
      */
@@ -114,7 +115,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 获得服务名称
+     * 获得服务名称。
      *
      * @return 服务名称
      */
@@ -123,7 +124,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 获得调用该服务的主机名称
+     * 获得调用该服务的主机名称。
      *
      * @return 调用该服务的主机名称
      */
@@ -132,7 +133,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 获得调用该服务的项目名称
+     * 获得调用该服务的项目名称。
      *
      * @return 调用该服务的项目名称
      */
@@ -141,7 +142,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 获得报警消息创建时间
+     * 获得报警消息创建时间。
      *
      * @return 报警消息创建时间
      */
@@ -150,7 +151,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 获得服务发生不可用的总次数
+     * 获得服务发生不可用的总次数。
      *
      * @return 服务发生不可用的总次数
      */
@@ -159,7 +160,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 获得服务从不可用状态恢复的总次数
+     * 获得服务从不可用状态恢复的总次数。
      *
      * @return 服务从不可用状态恢复的总次数
      */
@@ -168,7 +169,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 获得服务曾处于不可用状态下的提供方主机名称 Set，如果该服务为本地服务，Set 为空
+     * 获得服务曾处于不可用状态下的提供方主机名称 Set，如果该服务为本地服务，Set 为空。
      *
      * @return 服务曾处于不可用状态下的提供方主机名称 Set
      */
@@ -177,7 +178,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 获得服务当前仍处于不可用状态下的提供方主机名称 Set，如果该服务为本地服务，Set 为空
+     * 获得服务当前仍处于不可用状态下的提供方主机名称 Set，如果该服务为本地服务，Set 为空。
      *
      * @return 服务当前仍处于不可用状态下的提供方主机名称 Set
      */
@@ -190,7 +191,7 @@ public class ServiceAlarmMessage {
     }
 
     /**
-     * 将当前报警消息拼装成文本输出
+     * 将当前报警消息拼装成文本输出。
      *
      * @return 当前报警消息拼装成的文本信息
      */

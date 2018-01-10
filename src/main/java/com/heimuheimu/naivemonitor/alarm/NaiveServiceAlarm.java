@@ -34,8 +34,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 当服务不可用或从不可用状态恢复时，可通过此报警器进行实时通知
- * <p>注意：当前实现是线程安全的</p>
+ * {@code NaiveServiceAlarm} 在服务不可用或从不可用状态恢复时进行实时通知。
+ *
+ * <p><strong>说明：</strong>{@code NaiveServiceAlarm} 类是线程安全的，可在多个线程中使用同一个实例。</p>
  *
  * @author heimuheimu
  */
@@ -74,7 +75,7 @@ public class NaiveServiceAlarm {
     private boolean isNotificationThreadRunning = false;
 
     /**
-     * 构造一个服务报警器，该报警器将会对两条创建时间间隔小于 3 秒的报警消息进行合并，合并最大条数为 50 条
+     * 构造一个 {@code NaiveServiceAlarm} 实例，该报警器将会对两条创建时间间隔小于 3 秒的报警消息进行合并，合并最大条数为 50 条。
      *
      * @param notifierList 报警消息通知器列表，不允许为 {@code null} 或空
      * @throws IllegalArgumentException 如果消息通知器列表为 {@code null} 或空时，抛出此异常
@@ -84,7 +85,7 @@ public class NaiveServiceAlarm {
     }
 
     /**
-     * 构造一个服务报警器
+     * 构造一个 {@code NaiveServiceAlarm} 实例。
      *
      * @param notifierList 报警消息通知器列表，不允许为 {@code null} 或空
      * @param maxMessageBatchSize 报警消息合并最大条数，不允许小于等于 0
@@ -101,7 +102,7 @@ public class NaiveServiceAlarm {
     }
 
     /**
-     * 对不可用的服务进行报警通知
+     * 对不可用的服务进行报警通知。
      *
      * @param serviceContext 当前不可用的服务信息
      */
@@ -113,9 +114,9 @@ public class NaiveServiceAlarm {
     }
 
     /**
-     * 对服务从不可用状态恢复进行通知
+     * 对服务从不可用状态恢复进行通知。
      *
-     * @param serviceContext 从不可用状态恢复的服务
+     * @param serviceContext 从不可用状态恢复的服务信息
      */
     public void onRecovered(ServiceContext serviceContext) {
         synchronized (notificationThreadLock) {
@@ -125,8 +126,9 @@ public class NaiveServiceAlarm {
     }
 
     /**
-     * 启动报警消息通知线程，对当前队列中的报警消息进行通知
-     * <br>注意：该方法必须在获取 {@link #notificationThreadLock} 锁后进行执行
+     * 启动报警消息通知线程，对当前队列中的报警消息进行通知。
+     *
+     * <br>注意：该方法必须在获取 {@link #notificationThreadLock} 锁后进行执行。
      */
     private void startNotificationThread() {
         if (!isNotificationThreadRunning) {

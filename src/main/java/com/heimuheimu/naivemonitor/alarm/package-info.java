@@ -22,24 +22,9 @@
  * SOFTWARE.
  */
 
-package com.heimuheimu.naivemonitor.alarm;
-
 /**
- * 服务不可用或从不可用状态恢复的报警消息通知器，由于报警信息实时性要求较高，建议采用短信、钉钉等方式进行发送。
+ * 提供 {@link com.heimuheimu.naivemonitor.alarm.NaiveServiceAlarm} 类来实现服务不可用或从不可用状态恢复的实时通知。
  *
- * <p><strong>说明：</strong>{@code ServiceAlarmMessageNotifier} 的实现类必须是线程安全的。</p>
- *
- * @see NaiveServiceAlarm
  * @author heimuheimu
  */
-public interface ServiceAlarmMessageNotifier {
-
-    /**
-     * 发送一条服务不可用或从不可用状态恢复的报警消息，如果成功，返回 {@code true}，否则返回 {@code false}。
-     *
-     * @param serviceAlarmMessage 服务不可用或从不可用状态恢复的报警消息
-     * @return 是否发送成功
-     */
-    boolean send(ServiceAlarmMessage serviceAlarmMessage);
-
-}
+package com.heimuheimu.naivemonitor.alarm;

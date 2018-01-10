@@ -35,10 +35,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 使用钉钉实现的报警消息通知器，钉钉机器人开发文档请查阅：
+ * 使用钉钉实现的报警消息通知器。
+ *
+ * <p>
+ * 钉钉机器人开发文档请查阅：
  * <a href="https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1">
  *     https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1
  * </a>
+ * </p>
+ *
+ * <p><strong>说明：</strong>{@code NaiveServiceAlarm} 类是线程安全的，可在多个线程中使用同一个实例。</p>
  *
  * @author heimuheimu
  */
@@ -72,11 +78,7 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
     private final String recoveredImageUrl;
 
     /**
-     * 构造一个使用钉钉实现的报警消息通知器，发送超时设置为 5 秒钟，钉钉机器人开发文档请查阅：
-     * <a href="https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1">
-     *     https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1
-     * </a>
-     *
+     * 构造一个使用钉钉实现的报警消息通知器，发送超时设置为 5 秒钟。
      * <p>
      *     如果 url 设置为 {@code null} 或空，{@link #send(ServiceAlarmMessage)} 只进行 WARN 级别日志打印，不进行实际发送，并永远返回 {@code false}。
      * </p>
@@ -88,18 +90,15 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
     }
 
     /**
-     * 构造一个使用钉钉实现的报警消息通知器，发送超时设置为 5 秒钟，钉钉机器人开发文档请查阅：
-     * <a href="https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1">
-     *     https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1
-     * </a>
-     *
-     * <p>
-     *     如果 url 设置为 {@code null} 或空，{@link #send(ServiceAlarmMessage)} 只进行 WARN 级别日志打印，不进行实际发送，并永远返回 {@code false}。
-     * </p>
+     * 构造一个使用钉钉实现的报警消息通知器，可指定 Http 代理地址，发送超时设置为 5 秒钟。
      *
      * <p>
      *     如果本机无法访问公网，可通过 Http(Https) 代理的方式来实现钉钉报警，例如使用 Tinyproxy，更多资料请查阅：
      *     <a href="https://tinyproxy.github.io">https://tinyproxy.github.io</a>
+     * </p>
+     *
+     * <p>
+     *     如果 url 设置为 {@code null} 或空，{@link #send(ServiceAlarmMessage)} 只进行 WARN 级别日志打印，不进行实际发送，并永远返回 {@code false}。
      * </p>
      *
      * @param url 钉钉消息发送 URL 地址
@@ -110,18 +109,15 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
     }
 
     /**
-     * 构造一个使用钉钉实现的报警消息通知器，钉钉机器人开发文档请查阅：
-     * <a href="https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1">
-     *     https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1
-     * </a>
-     *
-     * <p>
-     *     如果 url 设置为 {@code null} 或空，{@link #send(ServiceAlarmMessage)} 只进行 WARN 级别日志打印，不进行实际发送，并永远返回 {@code false}。
-     * </p>
+     * 构造一个使用钉钉实现的报警消息通知器，可指定 Http 代理地址和发送超时时间。
      *
      * <p>
      *     如果本机无法访问公网，可通过 Http(Https) 代理的方式来实现钉钉报警，例如使用 Tinyproxy，更多资料请查阅：
      *     <a href="https://tinyproxy.github.io">https://tinyproxy.github.io</a>
+     * </p>
+     *
+     * <p>
+     *     如果 url 设置为 {@code null} 或空，{@link #send(ServiceAlarmMessage)} 只进行 WARN 级别日志打印，不进行实际发送，并永远返回 {@code false}。
      * </p>
      *
      * @param url 钉钉消息发送 URL 地址，允许为 {@code null} 或空
