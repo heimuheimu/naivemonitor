@@ -31,10 +31,9 @@ import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 监控器常用方法工具类
+ * NaiveAsync 项目使用的工具类。
  *
  * @author heimuheimu
- * @ThreadSafe
  */
 public class MonitorUtil {
     
@@ -58,7 +57,7 @@ public class MonitorUtil {
     }
 
     /**
-     * 对目标数值执行 {@link AtomicLong#addAndGet(long)} 操作，如果目标数值执行 add 操作后小于 0，则将其重置为 0
+     * 对目标数值执行 {@link AtomicLong#addAndGet(long)} 操作，如果目标数值执行 add 操作后小于 0，则将其重置为 0。
      *
      * @param target 目标数值
      * @param delta add 操作需要增加的数量
@@ -75,9 +74,10 @@ public class MonitorUtil {
     }
 
     /**
-     * 获得当前 JVM 运行的机器名
+     * 获得当前 JVM 运行的机器名。
      *
      * @return 当前 JVM 运行的机器名
+     * @see InetAddress#getHostName()
      */
     public static String getLocalHostName() {
         return LOCAL_HOST_NAME;
