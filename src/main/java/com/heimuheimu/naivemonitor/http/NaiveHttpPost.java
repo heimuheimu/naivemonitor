@@ -33,19 +33,23 @@ import java.util.Map;
 
 /**
  * 对 {@link HttpURLConnection} 进行封装，简化 Http post 请求执行过程。
- * <br>将每次远程访问的操作记录下来可以在生产环境定位问题提供极大的便利，建议配置 Log4j 保存每一次的 Http post 请求：
  *
- * <p>注意：当前实现是非线程安全的，每个 NaiveHttpPost 实例对应一次 POST 请求执行，不可复用。</p>
- * <code>
- * log4j.logger.com.heimuheimu.naivemonitor.http.NaiveHttpPost=INFO, NAIVEMONITOR_HTTP_POST_LOG <br>
- * log4j.additivity.com.heimuheimu.naivemonitor.http.NaiveHttpPost=false <br>
- * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG=org.apache.log4j.DailyRollingFileAppender <br>
- * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.file=${log.output.directory}/naivemonitor/http_post.log <br>
- * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.encoding=UTF-8 <br>
- * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.DatePattern=_yyyy-MM-dd <br>
- * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.layout=org.apache.log4j.PatternLayout <br>
- * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.layout.ConversionPattern=%d{ISO8601} %-5p [%F:%L] : %m%n <br>
- * </code>
+ * <h3>Http post 请求执行日志 Log4j 配置</h3>
+ * <blockquote>
+ * <pre>
+ * log4j.logger.com.heimuheimu.naivemonitor.http.NaiveHttpPost=INFO, NAIVEMONITOR_HTTP_POST_LOG
+ * log4j.additivity.com.heimuheimu.naivemonitor.http.NaiveHttpPost=false
+ * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG=org.apache.log4j.DailyRollingFileAppender
+ * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.file=${log.output.directory}/naivemonitor/http_post.log
+ * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.encoding=UTF-8
+ * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.DatePattern=_yyyy-MM-dd
+ * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.layout=org.apache.log4j.PatternLayout
+ * log4j.appender.NAIVEMONITOR_HTTP_POST_LOG.layout.ConversionPattern=%d{ISO8601} %-5p [%F:%L] : %m%n
+ * </pre>
+ * </blockquote>
+ *
+ * <p><strong>说明：</strong>{@code NaiveHttpPost} 类是是非线程安全的，不允许多个线程使用同一个实例。</p>
+ *
  * @author heimuheimu
  */
 public class NaiveHttpPost {
@@ -68,7 +72,7 @@ public class NaiveHttpPost {
     private boolean isExecuted = false;
 
     /**
-     * 构造一个 Http Post 请求
+     * 构造一个 {@code NaiveHttpPost} 实例。
      *
      * @param url Post 请求 URL 地址
      * @param timeout 连接和操作超时时间，单位：毫秒
@@ -79,9 +83,9 @@ public class NaiveHttpPost {
     }
 
     /**
-     * 构造一个 Http Post 请求
+     * 构造一个 {@code NaiveHttpPost} 实例。
      *
-     * <p>
+     * <p><strong>说明：</strong>
      *     如果本机无法访问公网，可通过 Http(Https) 代理的方式来实现公网访问，例如使用 Tinyproxy，更多资料请查阅：
      *     <a href="https://tinyproxy.github.io">https://tinyproxy.github.io</a>
      * </p>
@@ -129,7 +133,7 @@ public class NaiveHttpPost {
 
     /**
      * 获得 {@link HttpURLConnection} 实例，可在 {@link #doPost(String)} 执行之前进行更定制化的设置，
-     * 或者在 {@link #doPost(String)} 执行后获取更多的响应信息，例如响应状态码等
+     * 或者在 {@link #doPost(String)} 执行后获取更多的响应信息，例如响应状态码等。
      *
      * @return {@link HttpURLConnection} 实例
      */
@@ -138,8 +142,9 @@ public class NaiveHttpPost {
     }
 
     /**
-     * 执行 Http post 请求，并返回执行后的响应文本内容，该方法仅允许执行一次，并在该方法执行结束后会对网络资源（Socket 连接、输入流、输出流）进行关闭、释放。
-     * <br>注意：该方法仅允许执行一次，后续调用将会抛出 {@link IllegalStateException} 异常
+     * 执行 Http post 请求，并返回执行后的响应文本内容，该方法仅允许执行一次，重复调用将会抛出 {@link IllegalStateException} 异常。
+     *
+     * <p><strong>说明：</strong>在该方法执行结束后，会对网络资源（Socket 连接、输入流、输出流）进行关闭、释放。</p>
      *
      * @param body post 的数据内容，不允许为 {@code null} 或空字符串
      * @return Http post 请求执行后的响应文本内容
@@ -200,8 +205,8 @@ public class NaiveHttpPost {
     }
 
     /**
-     * 根据参数 Map 构造出 Http post 请求 body 内容，Map 的 Key 为参数名，Value 为参数值
-     * <br>参数值将会通过 {@link URLEncoder#encode(String, String)} 方法进行 UTF-8 编码
+     * 根据参数 Map 构造出 Http post 请求使用的 body 内容，Map 的 Key 为参数名，Value 为参数值，
+     * 参数值将会通过 {@link URLEncoder#encode(String, String)} 方法进行 UTF-8 编码。
      *
      * @param params Post 参数 Map
      * @return Http post 请求 body 内容
