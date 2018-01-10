@@ -34,8 +34,20 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 操作执行信息采集器抽象实现
+ * 操作执行信息采集器抽象实现类。该采集器将会返回以下数据项：
+ * <ul>
+ *     <li>{moduleName}_{collectorName}_tps/module={moduleName} 时间周期内每秒平均执行次数</li>
+ *     <li>{moduleName}_{collectorName}_peak_tps/module={moduleName} 时间周期内每秒最大执行次数</li>
+ *     <li>{moduleName}_{collectorName}_avg_exec_time/module={moduleName} 时间周期内单次操作平均执行时间</li>
+ *     <li>{moduleName}_{collectorName}_max_exec_time/module={moduleName} 时间周期内单次操作最大执行时间</li>
+ * </ul>
  *
+ * 如果配置了执行错误 Metric 后缀 Map，将会返回以下数据项：
+ * <ul>
+ *     <li>{moduleName}_{collectorName}{errorMetricSuffix}/module={moduleName} 时间周期内该错误出现的次数</li>
+ * </ul>
+ *
+ * @see ExecutionMonitor
  * @author heimuheimu
  */
 public abstract class AbstractExecutionDataCollector extends AbstractFalconDataCollector {
@@ -47,14 +59,14 @@ public abstract class AbstractExecutionDataCollector extends AbstractFalconDataC
     private final ConcurrentHashMap<Integer, Long> lastErrorCountMap = new ConcurrentHashMap<>();
 
     /**
-     * 获得当前操作执行信息采集器所依赖的数据源
+     * 获得当前操作执行信息采集器所依赖的数据源。
      *
      * @return 操作执行信息采集器所依赖的数据源
      */
     protected abstract List<ExecutionMonitor> getExecutionMonitorList();
 
     /**
-     * 获得需要采集的执行错误次数 Map，Key 为错误码， Value 为该错误码对应的 Metric 后缀，例如 "_too_busy"
+     * 获得需要采集的执行错误 Metric 后缀 Map，Key 为错误码， Value 为该错误码对应的 Metric 后缀，例如 "_too_busy"。
      *
      * @return 需要采集的执行错误次数 Map
      */

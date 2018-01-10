@@ -42,11 +42,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Falcon 监控数据上报服务，周期性的将监控数据推送到 Falcon 监控系统中，关于 Falcon 系统的更多信息请参考文档：
+ * {@code FalconReporter} 会周期性的采集各 {@link FalconDataCollector} 中的监控数据，将其推送至 Falcon 系统，周期由 {@link FalconDataCollector} 自行定义。
  * <p>
+ *     关于 Falcon 系统的更多信息请参考文档：
  *     <a href="https://book.open-falcon.org/zh/usage/data-push.html">https://book.open-falcon.org/zh/usage/data-push.html</a>
  * </p>
  *
+ * <p><strong>说明：</strong>{@code FalconReporter} 类是线程安全的，可在多个线程中使用同一个实例。</p>
+ *
+ * @see FalconDataCollector
  * @author heimuheimu
  */
 public class FalconReporter implements Closeable {
@@ -74,7 +78,7 @@ public class FalconReporter implements Closeable {
     private ScheduledExecutorService executorService = null;
 
     /**
-     * 构造一个基于 Falcon 系统的监控数据上报服务，Endpoint 默认为机器名
+     * 构造一个 {@code FalconReporter} 实例，Endpoint 默认为机器名。
      *
      * @param pushUrl 用于接收监控数据的 Falcon 接口 URL 地址，不允许为 {@code null}
      * @param falconDataCollectorList 监控数据收集器列表，不允许为 {@code null}
@@ -84,7 +88,7 @@ public class FalconReporter implements Closeable {
     }
 
     /**
-     * 构造一个基于 Falcon 系统的监控数据上报服务，Endpoint 默认为机器名，并会根据该机器名尝试从别名 Map 中获取对应的别名
+     * 构造一个 {@code FalconReporter} 实例，Endpoint 默认为机器名，并会根据该机器名尝试从别名 Map 中获取对应的别名。
      *
      * @param pushUrl 用于接收监控数据的 Falcon 接口 URL 地址，不允许为 {@code null}
      * @param falconDataCollectorList 监控数据收集器列表，不允许为 {@code null}
@@ -106,7 +110,7 @@ public class FalconReporter implements Closeable {
     }
 
     /**
-     * 执行监控数据上报服务初始化操作，初始化完成后，上报服务即开始正常工作
+     * 执行 {@code FalconReporter} 初始化操作。
      */
     public synchronized void init() {
         if (executorService == null) {
@@ -149,7 +153,7 @@ public class FalconReporter implements Closeable {
     }
 
     /**
-     * 关闭当前监控数据上报服务，一旦服务关闭后，不允许执行重新初始化操作
+     * 执行 {@code FalconReporter} 关闭操作，将会关闭 {@code FalconReporter} 使用的线程池，释放资源。
      */
     @Override
     public synchronized void close() {
@@ -159,7 +163,7 @@ public class FalconReporter implements Closeable {
     }
 
     /**
-     * 监控数据上报任务
+     * 监控数据上报任务。
      */
     private static class ReportTask implements Runnable {
 

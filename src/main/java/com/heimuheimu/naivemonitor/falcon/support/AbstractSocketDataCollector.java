@@ -31,8 +31,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Socket 信息采集器抽象实现
+ * Socket 读、写信息采集器抽象实现类。该采集器将会返回以下数据项：
+ * <ul>
+ *     <li>{moduleName}_{collectorName}_socket_read_bytes/module={moduleName} 时间周期内 Socket 读取的总字节数</li>
+ *     <li>{moduleName}_{collectorName}_socket_avg_read_bytes/module={moduleName} 时间周期内 Socket 每次读取的平均字节数</li>
+ *     <li>{moduleName}_{collectorName}_socket_written_bytes/module={moduleName} 时间周期内 Socket 写入的总字节数</li>
+ *     <li>{moduleName}_{collectorName}_socket_avg_written_bytes/module={moduleName} 时间周期内 Socket 每次写入的平均字节数</li>
+ * </ul>
  *
+ * @see SocketMonitor
  * @author heimuheimu
  */
 public abstract class AbstractSocketDataCollector extends AbstractFalconDataCollector {
@@ -46,9 +53,9 @@ public abstract class AbstractSocketDataCollector extends AbstractFalconDataColl
     private volatile long lastWrittenByteCount = 0;
 
     /**
-     * 获得当前 Socket 信息采集器所依赖的数据源
+     * 获得当前 Socket 读、写信息采集器所依赖的数据源。
      *
-     * @return Socket 信息采集器所依赖的数据源
+     * @return Socket 读、写信息采集器所依赖的数据源
      */
     protected abstract List<SocketMonitor> getSocketMonitorList();
 

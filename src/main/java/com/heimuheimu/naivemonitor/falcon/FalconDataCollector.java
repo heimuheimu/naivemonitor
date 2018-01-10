@@ -27,25 +27,27 @@ package com.heimuheimu.naivemonitor.falcon;
 import java.util.List;
 
 /**
- * Falcon 监控数据采集器，Falcon 监控数据上报服务将会根据收集器设置的时间周期进行周期性的采集上报
- * <br><b>注意：采集器采集的 Falcon 监控数据项中的 endpoint 不需要进行设置，将会由上报服务在上报前统一进行设置</b>
+ * Falcon 监控数据采集器，{@link FalconReporter} 会周期性的调用 {@link #getList()} 方法，将返回的监控数据列表推送至 Falcon 系统。
+ *
+ * <p><strong>说明：</strong>{@code FalconDataCollector} 的实现类必须是线程安全的。</p>
  *
  * @author heimuheimu
  */
 public interface FalconDataCollector {
 
     /**
-     * 获取该收集器执行的时间周期，单位：秒
+     * 获取该采集器执行的时间周期，单位：秒，不建议设置小于 30 的值。
      *
-     * @return 收集器执行的时间周期，单位：秒
+     * @return 采集器执行的时间周期，单位：秒
      */
     int getPeriod();
 
     /**
-     * 获取监控数据列表
-     * <br><b>注意：采集器采集的 Falcon 监控数据项中的 endpoint 不需要进行设置，将会由上报服务在上报前统一进行设置</b>
+     * 获取 Falcon 监控数据列表，由 {@link FalconReporter} 周期性调用并推送至 Falcon 系统。
      *
-     * @return 监控数据列表
+     * <p><strong>注意：</strong>监控数据中的 Endpoint 由 {@link FalconReporter} 统一设置，采集器中设置的 Endpoint 值将会被覆盖。</p>
+     *
+     * @return Falcon 监控数据列表
      */
     List<FalconData> getList();
 

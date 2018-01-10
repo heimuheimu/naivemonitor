@@ -28,21 +28,21 @@ import com.heimuheimu.naivemonitor.falcon.FalconData;
 import com.heimuheimu.naivemonitor.falcon.FalconDataCollector;
 
 /**
- * Falcon 监控数据采集器抽象实现
+ * Falcon 监控数据采集器抽象实现类。
  *
  * @author heimuheimu
  */
 public abstract class AbstractFalconDataCollector implements FalconDataCollector {
 
     /**
-     * 获得当前监控数据所在的模块名称，将会在 {@link FalconData#getMetric()} 中作为前缀出现，也会出现在 {@link FalconData#getTags()} 中
+     * 获得当前监控数据所在的模块名称，将会在 {@link FalconData#getMetric()} 中作为前缀出现，也会出现在 {@link FalconData#getTags()} 中。
      *
      * @return 当前监控数据所在的模块名称，将会在 {@link FalconData#getMetric()} 中作为前缀出现，也会出现在 {@link FalconData#getTags()} 中
      */
     protected abstract String getModuleName();
 
     /**
-     * 获得当前采集器名称，默认为空字符串，该名称将会作为 {@link FalconData#getMetric()} 中的一部分出现
+     * 获得当前采集器名称，默认为空字符串，该名称将会作为 {@link FalconData#getMetric()} 中的一部分出现。
      *
      * @return 采集器名称
      */
@@ -51,11 +51,11 @@ public abstract class AbstractFalconDataCollector implements FalconDataCollector
     }
 
     /**
-     * 创建一个 Falcon 监控数据项，endpoint 不进行设置
+     * 创建一个 Falcon 监控数据，Endpoint 不进行设置。
      *
      * @param metricSuffix Metric 后缀，用于与 {@link #getModuleName()} 组装成完整的 Metric
      * @param value 该 metric 在当前时间点的值
-     * @return Falcon 监控数据项
+     * @return Falcon 监控数据
      */
     protected FalconData create(String metricSuffix, double value) {
         FalconData data = new FalconData();
@@ -74,5 +74,4 @@ public abstract class AbstractFalconDataCollector implements FalconDataCollector
             return getModuleName() + "_" + getCollectorName() + metricSuffix;
         }
     }
-
 }

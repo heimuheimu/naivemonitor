@@ -31,8 +31,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 线程池信息采集器抽象实现
+ * 线程池信息采集器抽象实现类。该采集器将会返回以下数据项：
+ * <ul>
+ *     <li>{moduleName}_{collectorName}_threadPool_rejected_count/module={moduleName} 时间周期内所有线程池拒绝执行的任务总数</li>
+ *     <li>{moduleName}_{collectorName}_threadPool_active_count/module={moduleName} 采集时刻所有线程池活跃线程数近似值总和</li>
+ *     <li>{moduleName}_{collectorName}_threadPool_pool_size/module={moduleName} 采集时刻所有线程池线程数总和</li>
+ *     <li>{moduleName}_{collectorName}_threadPool_peak_pool_size/module={moduleName} 所有线程池出现过的最大线程数总和</li>
+ *     <li>{moduleName}_{collectorName}_threadPool_core_pool_size/module={moduleName} 所有线程池配置的核心线程数总和</li>
+ *     <li>{moduleName}_{collectorName}_threadPool_maximum_pool_size/module={moduleName} 所有线程池配置的最大线程数总和</li>
+ * </ul>
  *
+ * @see ThreadPoolMonitor
  * @author heimuheimu
  */
 public abstract class AbstractThreadPoolDataCollector extends AbstractFalconDataCollector {
@@ -82,5 +91,4 @@ public abstract class AbstractThreadPoolDataCollector extends AbstractFalconData
 
         return falconDataList;
     }
-
 }

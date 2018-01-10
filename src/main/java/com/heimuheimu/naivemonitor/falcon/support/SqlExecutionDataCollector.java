@@ -35,8 +35,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * SQL 语句执行信息采集器
+ * SQL 语句执行信息采集器。该采集器的采集周期为 30 秒，采集时会返回以下数据项：
+ * <ul>
+ *     <li>{moduleName}_{dbName}_sql_error/module={moduleName} 30 秒内 SQL 执行错误次数</li>
+ *     <li>{moduleName}_{dbName}_sql_slow_execution/module={moduleName} 30 秒内 SQL 慢查次数</li>
+ *     <li>{moduleName}_{dbName}_sql_max_result_size/module={moduleName} 30 秒内单条 Select 语句返回的最大记录行数</li>
+ *     <li>{moduleName}_{dbName}_sql_max_updated_rows/module={moduleName} 30 秒内单条 Update 语句更新的最大行数</li>
+ *     <li>{moduleName}_{dbName}_sql_max_deleted_rows/module={moduleName} 30 秒内单条 Delete 语句删除的最大行数</li>
+ *     <li>{moduleName}_{dbName}_sql_tps/module={moduleName} 30 秒内 SQL 每秒平均执行次数</li>
+ *     <li>{moduleName}_{dbName}_sql_peak_tps/module={moduleName} 30 秒内 SQL 每秒最大执行次数</li>
+ *     <li>{moduleName}_{dbName}_sql_avg_exec_time/module={moduleName} 30 秒内单次 SQL 操作平均执行时间</li>
+ *     <li>{moduleName}_{dbName}_sql_max_exec_time/module={moduleName} 30 秒内单次 SQL 操作最大执行时间</li>
+ * </ul>
  *
+ * @see SqlExecutionMonitor
  * @author heimuheimu
  */
 public class SqlExecutionDataCollector extends AbstractExecutionDataCollector {
@@ -58,7 +70,6 @@ public class SqlExecutionDataCollector extends AbstractExecutionDataCollector {
      * 当前采集器名称
      */
     private final String collectorName;
-
 
     /**
      * SQL 语句执行信息采集器
@@ -123,5 +134,4 @@ public class SqlExecutionDataCollector extends AbstractExecutionDataCollector {
     protected Map<Integer, String> getErrorMetricSuffixMap() {
         return ERROR_METRIC_SUFFIX_MAP;
     }
-
 }

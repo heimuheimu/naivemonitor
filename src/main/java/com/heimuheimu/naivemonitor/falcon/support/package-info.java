@@ -23,12 +23,8 @@
  */
 
 /**
- * 提供 {@link com.heimuheimu.naivemonitor.falcon.FalconReporter} 类将监控数据推送至 Falcon 系统。
- * <p>
- *     关于 Falcon 系统的更多信息请参考文档：
- *     <a href="https://book.open-falcon.org/zh/usage/data-push.html">https://book.open-falcon.org/zh/usage/data-push.html</a>
- * </p>
+ * 提供各类 NaiveMonitor 框架已实现的 Falcon 监控数据采集器。
  *
  * @author heimuheimu
  */
-package com.heimuheimu.naivemonitor.falcon;
+package com.heimuheimu.naivemonitor.falcon.support;
