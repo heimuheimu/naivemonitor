@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  * log4j.logger.NAIVESQL_ERROR_EXECUTION_LOGGER=ERROR, NAIVESQL_ERROR_EXECUTION_LOGGER
  * log4j.additivity.NAIVESQL_ERROR_EXECUTION_LOGGER=false
  * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER=org.apache.log4j.DailyRollingFileAppender
- * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.file=${log.output.directory}/naivesql/error.log
+ * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.file=${log.output.directory}/naivemonitor/sql_error.log
  * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.encoding=UTF-8
  * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.DatePattern=_yyyy-MM-dd
  * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.layout=org.apache.log4j.PatternLayout
@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
  * log4j.logger.NAIVESQL_SLOW_EXECUTION_LOGGER=ERROR, NAIVESQL_SLOW_EXECUTION_LOGGER
  * log4j.additivity.NAIVESQL_SLOW_EXECUTION_LOGGER=false
  * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER=org.apache.log4j.DailyRollingFileAppender
- * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.file=${log.output.directory}/naivesql/slow_execution.log
+ * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.file=${log.output.directory}/naivemonitor/sql_slow_execution.log
  * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.encoding=UTF-8
  * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.DatePattern=_yyyy-MM-dd
  * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.layout=org.apache.log4j.PatternLayout
