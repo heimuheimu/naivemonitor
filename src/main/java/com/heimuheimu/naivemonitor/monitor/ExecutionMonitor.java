@@ -30,11 +30,24 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 操作执行信息监控器
- * <p>当前实现是线程安全的</p>
+ * 操作执行信息监控器，可提供执行总次数、执行错误数、执行时间等信息。例如你需要在产品中对用户注册这个操作进行监控，可使用下面代码实现：
+ * <pre> {@code
+ * public void register(User user) {
+ *     long startTime = System.nanoTime();
+ *     try {
+ *       ... //业务逻辑
+ *     } catch (Exception e) {
+ *         executionMonitor.onError(-1); //对注册错误进行监控
+ *     } finally {
+ *         executionMonitor.onExecuted(startTime); //对注册操作进行监控
+ *     }
+ * }}</pre>
  *
+ * <p><strong>说明：</strong>{@code ExecutionMonitor} 类是线程安全的，可在多个线程中使用同一个实例。</p>
+ *
+ * @see com.heimuheimu.naivemonitor.monitor.factory.NaiveExecutionMonitorFactory
+ * @see com.heimuheimu.naivemonitor.falcon.support.AbstractExecutionDataCollector
  * @author heimuheimu
- * @ThreadSafe
  */
 public class ExecutionMonitor {
 
@@ -74,7 +87,7 @@ public class ExecutionMonitor {
     private final AtomicLong totalExecutionTime = new AtomicLong();
 
     /**
-     * 对执行完成的操作进行监控，执行开始时间应该在操作开始前执行 {@link System#nanoTime()} 方法获取
+     * 对执行完成的操作进行监控，执行开始时间应该在操作开始前执行 {@link System#nanoTime()} 方法获取。
      *
      * @param startNanoTime 操作执行开始时间，单位：纳秒
      */
@@ -103,7 +116,7 @@ public class ExecutionMonitor {
     }
 
     /**
-     * 对执行过程中发生的错误进行监控，失败错误码对应的错误次数 +1，可通过 {@link #getErrorCount(int)} 方法进行错误次数获取
+     * 对执行过程中发生的错误进行监控，失败错误码对应的错误次数 +1，可通过 {@link #getErrorCount(int)} 方法进行错误次数获取。
       *
      * @param errorCode 操作失败错误码，由使用方自行定义
      */
@@ -118,7 +131,7 @@ public class ExecutionMonitor {
     }
 
     /**
-     * 获得操作执行总次数
+     * 获得操作执行总次数。
      *
      * @return 操作执行总次数
      */
@@ -127,7 +140,7 @@ public class ExecutionMonitor {
     }
 
     /**
-     * 获得错误码对应的操作执行失败总次数
+     * 获得错误码对应的操作执行失败总次数。
      *
      * @param errorCode 错误码
      * @return 错误码对应的操作执行失败总次数
@@ -142,7 +155,7 @@ public class ExecutionMonitor {
     }
 
     /**
-     * 获得每秒最大操作执行数
+     * 获得每秒最大操作执行次数。
      *
      * @return 每秒最大操作执行数
      */
@@ -151,7 +164,7 @@ public class ExecutionMonitor {
     }
 
     /**
-     * 获得操作执行成功的最大执行时间，单位：纳秒
+     * 获得操作执行成功的最大执行时间，单位：纳秒。
      *
      * @return 操作执行成功的最大执行时间，单位：纳秒
      */
@@ -160,7 +173,7 @@ public class ExecutionMonitor {
     }
 
     /**
-     * 获得操作总执行时间，单位：纳秒
+     * 获得操作总执行时间，单位：纳秒。
      *
      * @return 操作总执行时间，单位：纳秒
      */
@@ -169,14 +182,14 @@ public class ExecutionMonitor {
     }
 
     /**
-     * 重置操作最大执行时间，单位：纳秒
+     * 重置操作最大执行时间，单位：纳秒。
      */
     public void resetMaxExecutionTime() {
         maxExecutionTime = 0;
     }
 
     /**
-     * 重置每秒最大操作执行数
+     * 重置每秒最大操作执行次数。
      */
     public void resetPeakTps() {
         peakTps = 0;

@@ -25,11 +25,14 @@
 package com.heimuheimu.naivemonitor.monitor;
 
 /**
- * SQL 语句执行信息监控器
- * <p>当前实现是线程安全的</p>
+ * SQL 语句执行信息监控器，并额外提供单条 Select 语句返回的最大记录行数、单条 Update 语句更新的最大行数、单条 Delete 语句删除的最大行数等信息。
  *
+ * <p><strong>说明：</strong>{@code SqlExecutionMonitor} 类是线程安全的，可在多个线程中使用同一个实例。</p>
+ *
+ * @see com.heimuheimu.naivemonitor.ibatis.SmartSqlMapClientTemplate
+ * @see com.heimuheimu.naivemonitor.monitor.factory.NaiveSqlExecutionMonitorFactory
+ * @see com.heimuheimu.naivemonitor.falcon.support.SqlExecutionDataCollector
  * @author heimuheimu
- * @ThreadSafe
  */
 public class SqlExecutionMonitor {
 
@@ -54,7 +57,7 @@ public class SqlExecutionMonitor {
     private volatile long maxDeletedRows = 0;
 
     /**
-     * 对数据库 Select 查询多条数据进行监控
+     * 对数据库 Select 查询多条数据进行监控。
      *
      * @param resultSize Select 语句查询的记录条数
      */
@@ -65,7 +68,7 @@ public class SqlExecutionMonitor {
     }
 
     /**
-     * 对数据库 Update 操作进行监控
+     * 对数据库 Update 操作进行监控。
      *
      * @param updatedRows 实际更新的行数
      */
@@ -76,7 +79,7 @@ public class SqlExecutionMonitor {
     }
 
     /**
-     * 对数据库 Delete 操作进行监控
+     * 对数据库 Delete 操作进行监控。
      *
      * @param deletedRows 实际删除的行数
      */
@@ -87,16 +90,17 @@ public class SqlExecutionMonitor {
     }
 
     /**
-     * 获得 SQL 语句执行监控器
+     * 获得 SQL 语句执行信息监控器。
      *
      * @return SQL 语句执行监控器
+     * @see com.heimuheimu.naivemonitor.ibatis.SmartSqlMapClientTemplate
      */
     public ExecutionMonitor getExecutionMonitor() {
         return executionMonitor;
     }
 
     /**
-     * 获得数据库单条 Select 语句返回的最大记录行数
+     * 获得数据库单条 Select 语句返回的最大记录行数。
      *
      * @return 数据库单条 Select 语句返回的最大记录行数
      */
@@ -105,7 +109,7 @@ public class SqlExecutionMonitor {
     }
 
     /**
-     * 获得数据库单条 Update 语句更新的最大行数
+     * 获得数据库单条 Update 语句更新的最大行数。
      *
      * @return 数据库单条 Update 语句更新的最大行数
      */
@@ -114,7 +118,7 @@ public class SqlExecutionMonitor {
     }
 
     /**
-     * 获得数据库单条 Delete 语句删除的最大行数
+     * 获得数据库单条 Delete 语句删除的最大行数。
      *
      * @return 数据库单条 Delete 语句删除的最大行数
      */
@@ -123,21 +127,21 @@ public class SqlExecutionMonitor {
     }
 
     /**
-     * 重置数据库单条 Select 语句返回的最大记录行数
+     * 重置数据库单条 Select 语句返回的最大记录行数。
      */
     public void resetMaxResultSize() {
         maxResultSize = 0;
     }
 
     /**
-     * 重置数据库单条 Update 语句更新的最大行数
+     * 重置数据库单条 Update 语句更新的最大行数。
      */
     public void resetMaxUpdatedRows() {
         maxUpdatedRows = 0;
     }
 
     /**
-     * 重置数据库单条 Delete 语句删除的最大行数
+     * 重置数据库单条 Delete 语句删除的最大行数。
      */
     public void resetMaxDeletedRows() {
         maxDeletedRows = 0;

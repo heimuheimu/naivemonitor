@@ -29,11 +29,12 @@ import com.heimuheimu.naivemonitor.MonitorUtil;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 压缩信息监控器
- * <p>当前实现是线程安全的</p>
+ * 压缩操作监控器，可提供已执行的压缩次数、通过压缩节省的字节总数等信息。
  *
+ * <p><strong>说明：</strong>{@code CompressionMonitor} 类是线程安全的，可在多个线程中使用同一个实例。</p>
+ *
+ * @see com.heimuheimu.naivemonitor.falcon.support.AbstractCompressionDataCollector
  * @author heimuheimu
- * @ThreadSafe
  */
 public class CompressionMonitor {
 
@@ -43,14 +44,14 @@ public class CompressionMonitor {
     private final AtomicLong compressedCount = new AtomicLong();
 
     /**
-     * 通过压缩操作节约的字节总数
+     * 通过压缩操作节省的字节总数
      */
     private final AtomicLong reduceByteCount = new AtomicLong();
 
     /**
-     * 对单次压缩操作进行监控
+     * 对单次压缩操作进行监控。
      *
-     * @param byteCount 本次压缩操作节约的字节总数
+     * @param byteCount 本次压缩操作节省的字节总数
      */
     public void onCompressed(long byteCount) {
         MonitorUtil.safeAdd(compressedCount, 1);
@@ -58,18 +59,18 @@ public class CompressionMonitor {
     }
 
     /**
-     * 获得已执行的压缩操作次数
+     * 获得已执行的压缩次数。
      *
-     * @return 已执行的压缩操作次数
+     * @return 已执行的压缩次数
      */
     public long getCompressedCount() {
         return compressedCount.get();
     }
 
     /**
-     * 获得通过压缩操作节约的字节总数
+     * 获得通过压缩节省的字节总数。
      *
-     * @return 通过压缩操作节约的字节总数
+     * @return 通过压缩节省的字节总数
      */
     public long getReduceByteCount() {
         return reduceByteCount.get();

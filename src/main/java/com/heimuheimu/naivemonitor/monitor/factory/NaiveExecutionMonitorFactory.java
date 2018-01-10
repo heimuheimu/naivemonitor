@@ -29,7 +29,9 @@ import com.heimuheimu.naivemonitor.monitor.ExecutionMonitor;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 操作执行信息监控器工厂类
+ * {@link ExecutionMonitor} 工厂类。
+ *
+ * <p><strong>说明：</strong>{@code NaiveExecutionMonitorFactory} 类是线程安全的，可在多个线程中使用同一个实例。</p>
  *
  * @author heimuheimu
  */
@@ -44,11 +46,10 @@ public class NaiveExecutionMonitorFactory {
     private static final Object lock = new Object();
 
     /**
-     * 根据名称获得对应的操作执行信息监控器，该方法不会返回 {@code null}
-     * <br>同一名称将返回同一个操作执行信息监控器
+     * 根据名称获得对应的 {@code ExecutionMonitor} 实例，相同名称将返回同一个{@code ExecutionMonitor} 实例，该方法不会返回 {@code null}。
      *
-     * @param name 操作执行信息监控器名称
-     * @return 操作执行信息监控器，不会返回 {@code null}
+     * @param name 监控器名称，不允许为 {@code null}
+     * @return {@code ExecutionMonitor} 实例，不会返回 {@code null}
      */
     public static ExecutionMonitor get(String name) {
         ExecutionMonitor monitor = EXECUTION_MONITOR_MAP.get(name);

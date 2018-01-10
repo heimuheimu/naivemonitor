@@ -34,11 +34,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 线程池信息监控器
- * <p>当前实现是线程安全的</p>
+ * 线程池信息监控器，对已注册的 {@code ThreadPoolExecutor} 进行监控，可提供当前活跃线程数近似值总和、核心线程数总和、最大线程数总和、
+ * 当前线程数总和、历史最大线程数总和、拒绝执行的任务总数等信息。
  *
+ * <p><strong>说明：</strong>{@code ThreadPoolMonitor} 类是线程安全的，可在多个线程中使用同一个实例。</p>
+ *
+ * @see ThreadPoolExecutor
+ * @see com.heimuheimu.naivemonitor.falcon.support.AbstractThreadPoolDataCollector
  * @author heimuheimu
- * @ThreadSafe
  */
 public class ThreadPoolMonitor {
 
@@ -55,7 +58,7 @@ public class ThreadPoolMonitor {
     private final AtomicLong rejectedCount = new AtomicLong();
 
     /**
-     * 将该线程池加入到监控的线程池列表中，当该线程池关闭后，会自动从监控的线程池列表中移除
+     * 将该线程池加入到监控的线程池列表中，当该线程池关闭后，会自动从监控的线程池列表中移除。
      *
      * @param executor 需要进行监控的线程池
      */
@@ -66,14 +69,14 @@ public class ThreadPoolMonitor {
     }
 
     /**
-     * 对线程池抛出 {@link RejectedExecutionException} 异常的操作进行监控
+     * 对线程池抛出 {@link RejectedExecutionException} 异常的操作进行监控。
      */
     public void onRejected() {
         MonitorUtil.safeAdd(rejectedCount, 1);
     }
 
     /**
-     * 获得线程池拒绝执行的任务总数
+     * 获得线程池拒绝执行的任务总数。
      *
      * @return 线程池拒绝执行的任务总数
      */
@@ -82,9 +85,10 @@ public class ThreadPoolMonitor {
     }
 
     /**
-     * 获得所有线程池中当前活跃线程数近似值总和
+     * 获得所有线程池中当前活跃线程数近似值总和。
      *
      * @return 所有线程池中当前活跃线程数近似值总和
+     * @see ThreadPoolExecutor#getActiveCount()
      */
     public int getActiveCount() {
         int activeCount = 0;
@@ -107,9 +111,10 @@ public class ThreadPoolMonitor {
     }
 
     /**
-     * 获得所有线程池配置的核心线程数总和
+     * 获得所有线程池配置的核心线程数总和。
      *
      * @return 所有线程池配置的核心线程数总和
+     * @see ThreadPoolExecutor#getCorePoolSize()
      */
     public int getCorePoolSize() {
         int corePoolSize = 0;
@@ -132,9 +137,10 @@ public class ThreadPoolMonitor {
     }
 
     /**
-     * 获得所有线程池配置的最大线程数总和
+     * 获得所有线程池配置的最大线程数总和。
      *
      * @return 所有线程池配置的最大线程数总和
+     * @see ThreadPoolExecutor#getMaximumPoolSize()
      */
     public int getMaximumPoolSize() {
         int maximumPoolSize = 0;
@@ -157,9 +163,10 @@ public class ThreadPoolMonitor {
     }
 
     /**
-     * 获得所有线程池当前线程数总和
+     * 获得所有线程池当前线程数总和。
      *
      * @return 所有线程池当前线程数总和
+     * @see ThreadPoolExecutor#getPoolSize()
      */
     public int getPoolSize() {
         int poolSize = 0;
@@ -182,10 +189,11 @@ public class ThreadPoolMonitor {
     }
 
     /**
-     * 获得所有线程池出现过的最大线程数总和
-     * <p>注意：不同线程池出现最大线程数时间可能不一致</p>
+     * 获得所有线程池出现过的最大线程数总和。
+     * <p>注意：不同线程池出现最大线程数时间可能不一致，此数据仅做参考。</p>
      *
      * @return 所有线程池出现过的最大线程数总和
+     * @see ThreadPoolExecutor#getLargestPoolSize()
      */
     public int getPeakPoolSize() {
         int peakPoolSize = 0;

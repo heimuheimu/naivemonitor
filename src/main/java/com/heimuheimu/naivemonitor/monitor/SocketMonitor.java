@@ -29,11 +29,12 @@ import com.heimuheimu.naivemonitor.MonitorUtil;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Socket 信息监控器
- * <p>当前实现是线程安全的</p>
+ * Socket 读、写信息监控器，可提供 Socket 读或写操作的次数、字节总数等信息。
  *
+ * <p><strong>说明：</strong>{@code SocketMonitor} 类是线程安全的，可在多个线程中使用同一个实例。</p>
+ *
+ * @see com.heimuheimu.naivemonitor.falcon.support.AbstractSocketDataCollector
  * @author heimuheimu
- * @ThreadSafe
  */
 public class SocketMonitor {
 
@@ -63,7 +64,7 @@ public class SocketMonitor {
     private final AtomicLong writtenByteCount = new AtomicLong();
 
     /**
-     * 构造一个 Socket 信息监控器
+     * 构造一个 Socket 读、写信息监控器。
      *
      * @param host Socket 连接目标地址，通常由主机名和端口组成，":"符号分割，例如：localhost:4141
      */
@@ -72,7 +73,7 @@ public class SocketMonitor {
     }
 
     /**
-     * 监控 Socket 完成的一次读取操作
+     * 监控 Socket 完成的一次读取操作。
      *
      * @param byteCount 本次 Socket 读取到的字节长度
      */
@@ -82,7 +83,7 @@ public class SocketMonitor {
     }
 
     /**
-     * 监控 Socket 完成的一次写入操作
+     * 监控 Socket 完成的一次写入操作。
      *
      * @param byteCount 本次 Socket 写入的字节长度
      */
@@ -92,7 +93,7 @@ public class SocketMonitor {
     }
 
     /**
-     * 获得 Socket 连接目标地址，通常由主机名和端口组成，":"符号分割，例如：localhost:4141
+     * 获得 Socket 连接目标地址，通常由主机名和端口组成，":"符号分割，例如：localhost:4141。
      *
      * @return Socket 连接目标地址
      */
@@ -101,7 +102,7 @@ public class SocketMonitor {
     }
 
     /**
-     * 获得 Socket 读操作执行次数
+     * 获得 Socket 读操作执行次数。
      *
      * @return Socket 读操作执行次数
      */
@@ -110,7 +111,7 @@ public class SocketMonitor {
     }
 
     /**
-     * 获得 Socket 读操作累计读取的字节总数
+     * 获得 Socket 读操作累计读取的字节总数。
      *
      * @return Socket 读操作累计读取的字节总数
      */
@@ -119,7 +120,7 @@ public class SocketMonitor {
     }
 
     /**
-     * 获得 Socket 写操作执行次数
+     * 获得 Socket 写操作执行次数。
      *
      * @return Socket 写操作执行次数
      */
@@ -128,7 +129,7 @@ public class SocketMonitor {
     }
 
     /**
-     * 获得 Socket 写操作累计写入的字节总数
+     * 获得 Socket 写操作累计写入的字节总数。
      *
      * @return Socket 写操作累计写入的字节总数
      */
