@@ -38,10 +38,36 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 基于 Spring 提供的 iBatis 帮助类实现的 SQL 执行器。通过封装 {@link SqlMapClientTemplate} ，来实现监控 SQL 语句执行信息。
+ * 对 Spring 提供的 iBatis 帮助类 {@code SqlMapClientTemplate} 进行封装，通过 {@link SqlExecutionMonitor} 对所有的 SQL 语句执行进行监控。
  *
+ * <h3>SQL 慢查和错误日志 Log4j 配置</h3>
+ * <blockquote>
+ * <pre>
+ * log4j.logger.NAIVESQL_ERROR_EXECUTION_LOGGER=ERROR, NAIVESQL_ERROR_EXECUTION_LOGGER
+ * log4j.additivity.NAIVESQL_ERROR_EXECUTION_LOGGER=false
+ * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER=org.apache.log4j.DailyRollingFileAppender
+ * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.file=${log.output.directory}/naivesql/error.log
+ * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.encoding=UTF-8
+ * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.DatePattern=_yyyy-MM-dd
+ * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.layout=org.apache.log4j.PatternLayout
+ * log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.layout.ConversionPattern=%d{ISO8601} %-5p [%F:%L] : %m%n
+ *
+ * log4j.logger.NAIVESQL_SLOW_EXECUTION_LOGGER=ERROR, NAIVESQL_SLOW_EXECUTION_LOGGER
+ * log4j.additivity.NAIVESQL_SLOW_EXECUTION_LOGGER=false
+ * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER=org.apache.log4j.DailyRollingFileAppender
+ * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.file=${log.output.directory}/naivesql/slow_execution.log
+ * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.encoding=UTF-8
+ * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.DatePattern=_yyyy-MM-dd
+ * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.layout=org.apache.log4j.PatternLayout
+ * log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.layout.ConversionPattern=%d{ISO8601} : %m%n
+ * </pre>
+ * </blockquote>
+ *
+ * <p><strong>说明：</strong>{@code SmartSqlMapClientTemplate} 类是线程安全的，可在多个线程中使用同一个实例。</p>
+ *
+ * @see SqlExecutionMonitor
+ * @see com.heimuheimu.naivemonitor.falcon.support.SqlExecutionDataCollector
  * @author heimuheimu
- * @ThreadSafe
  */
 public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
 
@@ -65,9 +91,9 @@ public class SmartSqlMapClientTemplate extends SqlMapClientTemplate {
     private final SqlExecutionMonitor sqlExecutionMonitor;
 
     /**
-     * 构造一个基于 Spring 提供的 iBatis 帮助类实现的 SQL 执行器
+     * 构造一个 {@code SmartSqlMapClientTemplate} 实例。
      *
-     * @param dbName 数据库名称
+     * @param dbName 数据库名称，用于获取 {@link SqlExecutionMonitor} 实例，不允许为 {@code null}
      * @param sqlMapClient SQL 执行器使用的 sqlMapClient
      * @param slowExecutionThreshold 大于该执行时间的 SQL 语句执行将会被定义为慢查，单位：毫秒
      */
