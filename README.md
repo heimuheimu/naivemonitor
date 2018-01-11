@@ -90,12 +90,12 @@ public class UserRegisterDataCollector extends AbstractExecutionDataCollector {
     </bean>
 ```
    完成以上工作后，在 Falcon 系统中可以找到以下数据项：
-* bookstore_register_tps/module=bookstore    bookstore 项目 30 秒内每秒平均用户注册次数
-* bookstore_register_peak_tps/module=bookstore    bookstore 项目 30 秒内每秒最大用户注册次数
-* bookstore_register_avg_exec_time/module=bookstore    bookstore 项目 时间周期内单次操作平均执行时间
-* bookstore_register_max_exec_time/module=bookstore    bookstore 项目 时间周期内单次操作最大执行时间
-* bookstore_register_duplicate_username/module=bookstore    bookstore 项目 30 秒内出现用户名已存在的错误次数
-* bookstore_register_exec_error/module=bookstore    bookstore 项目 30 秒内出现预期外的异常次数
+* bookstore_register_tps/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内每秒平均用户注册次数
+* bookstore_register_peak_tps/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内每秒最大用户注册次数
+* bookstore_register_avg_exec_time/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次注册操作平均执行时间
+* bookstore_register_max_exec_time/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次注册操作最大执行时间
+* bookstore_register_duplicate_username/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内出现用户名已存在的错误次数
+* bookstore_register_exec_error/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内出现预期外的异常次数
 
 ## 实时报警 DEMO
   在 Spring 中配置 [NaiveServiceAlarm](https://github.com/heimuheimu/naivemonitor/blob/master/src/main/java/com/heimuheimu/naivemonitor/alarm/NaiveServiceAlarm.java)：
