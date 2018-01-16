@@ -275,6 +275,8 @@ log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.layout.ConversionPattern=%d{ISO860
 类来实现 SQL 执行监控功能。
 
 ## 更多信息
-* [NaiveMonitor API Doc](https://heimuheimu.github.io/naivemonitor/api/v1.0/)
 * [Falcon 监控数据推送官方文档](https://book.open-falcon.org/zh/usage/data-push.html)
 * [钉钉机器人开发官方文档](https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1)
+* [NaiveMonitor v1.0 API Doc](https://heimuheimu.github.io/naivemonitor/api/v1.0/)
+* [NaiveMonitor v1.0 源码下载](https://heimuheimu.github.io/naivemonitor/download/naivemonitor-1.0-sources.jar)
+* [NaiveMonitor v1.0 Jar包下载](https://heimuheimu.github.io/naivemonitor/download/naivemonitor-1.0.jar)
