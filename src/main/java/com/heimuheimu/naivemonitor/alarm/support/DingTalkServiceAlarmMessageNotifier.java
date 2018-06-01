@@ -40,7 +40,7 @@ import java.util.List;
  * <p>
  * 钉钉机器人开发文档请查阅：
  * <a href="https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1">
- *     https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1
+ *     自定义机器人
  * </a>
  * </p>
  *
