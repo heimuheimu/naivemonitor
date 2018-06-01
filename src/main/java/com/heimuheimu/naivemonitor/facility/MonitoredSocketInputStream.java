@@ -56,7 +56,7 @@ public class MonitoredSocketInputStream extends InputStream {
      * @param socketMonitor Socket 读、写信息监控器，不允许为 {@code null}
      * @throws NullPointerException 如果 {@code in} 或者 {@code socketMonitor} 为 {@code null}，将会抛出此异常
      */
-    private MonitoredSocketInputStream(InputStream in, SocketMonitor socketMonitor) throws NullPointerException {
+    public MonitoredSocketInputStream(InputStream in, SocketMonitor socketMonitor) throws NullPointerException {
         if (in == null) {
             throw new NullPointerException("Create `MonitoredSocketInputStream` failed: `inputStream could not be null`.");
         }
