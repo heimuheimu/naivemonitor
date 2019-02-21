@@ -70,12 +70,23 @@ public abstract class AbstractSocketDataCollector extends AbstractFalconDataColl
         long writtenCount = 0;
         long writtenByteCount = 0;
 
+        long maxReadByteCount = 0;
+        long maxWrittenByteCount = 0;
+
         for (SocketMonitor socketMonitor : socketMonitorList) {
             readCount += socketMonitor.getReadCount();
             readByteCount += socketMonitor.getReadByteCount();
 
             writtenCount += socketMonitor.getWrittenCount();
             writtenByteCount += socketMonitor.getWrittenByteCount();
+
+            long currentMaxReadByteCount = socketMonitor.getMaxReadByteCount();
+            socketMonitor.resetMaxReadByteCount();
+            maxReadByteCount = maxReadByteCount < currentMaxReadByteCount ? currentMaxReadByteCount : maxReadByteCount;
+
+            long currentMaxWrittenByteCount = socketMonitor.getMaxWrittenByteCount();
+            socketMonitor.resetMaxWrittenByteCount();
+            maxWrittenByteCount = maxWrittenByteCount < currentMaxWrittenByteCount ? currentMaxWrittenByteCount : maxWrittenByteCount;
         }
 
         falconDataList.add(create("_socket_read_bytes", readByteCount - lastReadByteCount));
@@ -84,6 +95,7 @@ public abstract class AbstractSocketDataCollector extends AbstractFalconDataColl
             averageReadBytes = (readByteCount - lastReadByteCount) / (readCount - lastReadCount);
         }
         falconDataList.add(create("_socket_avg_read_bytes", averageReadBytes));
+        falconDataList.add(create("_socket_max_read_bytes", maxReadByteCount));
 
         falconDataList.add(create("_socket_written_bytes", writtenByteCount - lastWrittenByteCount));
         long averageWrittenBytes = 0;
@@ -91,6 +103,7 @@ public abstract class AbstractSocketDataCollector extends AbstractFalconDataColl
             averageWrittenBytes = (writtenByteCount - lastWrittenByteCount) / (writtenCount - lastWrittenCount);
         }
         falconDataList.add(create("_socket_avg_written_bytes", averageWrittenBytes));
+        falconDataList.add(create("_socket_max_written_bytes", maxWrittenByteCount));
 
         lastReadCount = readCount;
         lastReadByteCount = readByteCount;

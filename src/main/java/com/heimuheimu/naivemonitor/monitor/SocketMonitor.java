@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class SocketMonitor {
 
     /**
-     * Socket 连接目标地址，通常由主机名和端口组成，":"符号分割，例如：localhost:4141
+     * Socket 连接目标地址，通常由主机名和端口组成，":"符号分割，例如：localhost:4141，允许为空字符串
      */
     private final String host;
 
@@ -54,6 +54,11 @@ public class SocketMonitor {
     private final AtomicLong readByteCount = new AtomicLong();
 
     /**
+     * Socket 单次读操作读取的最大字节总数
+     */
+    private volatile long maxReadByteCount = 0;
+
+    /**
      * Socket 写操作执行次数
      */
     private final AtomicLong writtenCount = new AtomicLong();
@@ -64,12 +69,21 @@ public class SocketMonitor {
     private final AtomicLong writtenByteCount = new AtomicLong();
 
     /**
+     * Socket 单次写操作写入的最大字节总数
+     */
+    private volatile long maxWrittenByteCount = 0;
+
+    /**
      * 构造一个 Socket 读、写信息监控器。
      *
-     * @param host Socket 连接目标地址，通常由主机名和端口组成，":"符号分割，例如：localhost:4141
+     * @param host Socket 连接目标地址，通常由主机名和端口组成，":"符号分割，例如：localhost:4141，允许为空字符串
      */
     public SocketMonitor(String host) {
-        this.host = host;
+        if (host == null) {
+            this.host = "";
+        } else {
+            this.host = host.trim();
+        }
     }
 
     /**
@@ -80,6 +94,9 @@ public class SocketMonitor {
     public void onRead(long byteCount) {
         MonitorUtil.safeAdd(readCount, 1);
         MonitorUtil.safeAdd(readByteCount, byteCount);
+        if (byteCount > maxReadByteCount) {
+            maxReadByteCount = byteCount;
+        }
     }
 
     /**
@@ -90,6 +107,23 @@ public class SocketMonitor {
     public void onWritten(long byteCount) {
         MonitorUtil.safeAdd(writtenCount, 1);
         MonitorUtil.safeAdd(writtenByteCount, byteCount);
+        if (byteCount > maxWrittenByteCount) {
+            maxWrittenByteCount = byteCount;
+        }
+    }
+
+    /**
+     * 重置 Socket 单次读操作读取的最大字节总数。
+     */
+    public void resetMaxReadByteCount() {
+        this.maxReadByteCount = 0;
+    }
+
+    /**
+     * 重置 Socket 单次写操作写入的最大字节总数。
+     */
+    public void resetMaxWrittenByteCount() {
+       this.maxWrittenByteCount = 0;
     }
 
     /**
@@ -120,6 +154,15 @@ public class SocketMonitor {
     }
 
     /**
+     * 获得 Socket 单次读操作读取的最大字节总数。
+     *
+     * @return Socket 单次读操作读取的最大字节总数
+     */
+    public long getMaxReadByteCount() {
+        return maxReadByteCount;
+    }
+
+    /**
      * 获得 Socket 写操作执行次数。
      *
      * @return Socket 写操作执行次数
@@ -137,14 +180,25 @@ public class SocketMonitor {
         return writtenByteCount.get();
     }
 
+    /**
+     * 获得 Socket 单次写操作写入的最大字节总数。
+     *
+     * @return Socket 单次写操作写入的最大字节总数
+     */
+    public long getMaxWrittenByteCount() {
+        return maxWrittenByteCount;
+    }
+
     @Override
     public String toString() {
         return "SocketMonitor{" +
                 "host='" + host + '\'' +
                 ", readCount=" + readCount +
                 ", readByteCount=" + readByteCount +
+                ", maxReadByteCount=" + maxReadByteCount +
                 ", writtenCount=" + writtenCount +
                 ", writtenByteCount=" + writtenByteCount +
+                ", maxWrittenByteCount=" + maxWrittenByteCount +
                 '}';
     }
 }
