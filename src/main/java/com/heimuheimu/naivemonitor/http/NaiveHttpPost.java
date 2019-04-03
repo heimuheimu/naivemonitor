@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -164,40 +165,32 @@ public class NaiveHttpPost {
                     url + "`. Body: `" + body + "`.");
         }
         long startTime = System.currentTimeMillis();
-        OutputStream os = null;
-        InputStream is = null;
-        try {
-            byte[] bodyBytes = body.getBytes("utf-8");
-            os = urlConnection.getOutputStream();
-            os.write(bodyBytes);
-            os.flush();
 
-            is = urlConnection.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
-            StringBuilder responseTextBuffer = new StringBuilder();
-            String line;
-            while((line = reader.readLine()) != null) {
-                responseTextBuffer.append(line);
+        try {
+            try (OutputStream os = urlConnection.getOutputStream()) {
+                byte[] bodyBytes = body.getBytes("utf-8");
+                os.write(bodyBytes);
+                os.flush();
             }
-            String responseText = responseTextBuffer.toString();
-            LOGGER.info("Execute http post success. Cost: `{} ms`. Url: `{}`. Body: `{}`. Response text: `{}`.",
-                    System.currentTimeMillis() - startTime, url, body, responseText);
-            return responseText;
+
+            try (InputStream is = urlConnection.getInputStream();
+                 InputStreamReader inputStreamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
+                 BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                StringBuilder responseTextBuffer = new StringBuilder();
+                String line;
+                while((line = reader.readLine()) != null) {
+                    responseTextBuffer.append(line);
+                }
+                String responseText = responseTextBuffer.toString();
+                LOGGER.info("Execute http post success. Cost: `{} ms`. Url: `{}`. Body: `{}`. Response text: `{}`.",
+                        System.currentTimeMillis() - startTime, url, body, responseText);
+                return responseText;
+            }
         } catch (Exception e) {
             LOGGER.error("Execute http post method failed: `" + e.getMessage() + "`. Url: `" + url + "`. Body: `" + body + "`.", e);
             throw e;
         } finally {
             isExecuted = true;
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (Exception ignored) {}
-            }
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (Exception ignored) {}
-            }
             try {
                 urlConnection.disconnect();
             } catch (Exception ignored) {}
