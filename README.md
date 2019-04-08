@@ -1,5 +1,7 @@
 # NaiveMonitor: 快速实现数据监控和实时报警功能。
 
+[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/heimuheimu/naivemonitor.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/heimuheimu/naivemonitor/context:java)
+
 ## 使用要求
 * JDK 版本：1.8+ 
 * 依赖类库：
