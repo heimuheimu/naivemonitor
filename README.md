@@ -252,7 +252,7 @@ public class UserDaoImpl implements UserDao {
 
 SQL 执行日志配置：
 ```
-#SQL 慢查日志配置
+#SQL 错误日志配置
 log4j.logger.NAIVESQL_ERROR_EXECUTION_LOGGER=ERROR, NAIVESQL_ERROR_EXECUTION_LOGGER
 log4j.additivity.NAIVESQL_ERROR_EXECUTION_LOGGER=false
 log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER=org.apache.log4j.DailyRollingFileAppender
@@ -262,7 +262,7 @@ log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.DatePattern=_yyyy-MM-dd
 log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.layout=org.apache.log4j.PatternLayout
 log4j.appender.NAIVESQL_ERROR_EXECUTION_LOGGER.layout.ConversionPattern=%d{ISO8601} %-5p [%F:%L] : %m%n
 
-#SQL 错误日志配置
+#SQL 慢查日志配置
 log4j.logger.NAIVESQL_SLOW_EXECUTION_LOGGER=ERROR, NAIVESQL_SLOW_EXECUTION_LOGGER
 log4j.additivity.NAIVESQL_SLOW_EXECUTION_LOGGER=false
 log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER=org.apache.log4j.DailyRollingFileAppender
@@ -272,6 +272,23 @@ log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.DatePattern=_yyyy-MM-dd
 log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.layout=org.apache.log4j.PatternLayout
 log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.layout.ConversionPattern=%d{ISO8601} : %m%n
 ```
+
+完成以上工作后，在 Falcon 系统中可以找到以下数据项：
+
+SQL 执行错误数据项：
+* bookstore_bookstore_sql_error/module=bookstore 30 秒内 SQL 执行错误次数
+* bookstore_bookstore_sql_slow_execution/module=bookstore 30 秒内 SQL 慢查次数
+
+SQL 影响的行数数据项：
+* bookstore_bookstore_sql_max_result_size/module=bookstore 30 秒内单条 Select 语句返回的最大记录行数
+* bookstore_bookstore_sql_max_updated_rows/module=bookstore 30 秒内单条 Update 语句更新的最大行数
+* bookstore_bookstore_sql_max_deleted_rows/module=bookstore 30 秒内单条 Delete 语句删除的最大行数
+
+SQL 执行信息数据项：
+* bookstore_bookstore_sql_tps/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内 SQL 每秒平均执行次数
+* bookstore_bookstore_sql_peak_tps/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内 SQL 每秒最大执行次数
+* bookstore_bookstore_sql_avg_exec_time/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次 SQL 操作平均执行时间
+* bookstore_bookstore_sql_max_exec_time/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次 SQL 操作最大执行时间
 
 如果你的项目在使用其它 ORM 框架，请参考 [SmartSqlMapClientTemplate](https://github.com/heimuheimu/naivemonitor/blob/master/src/main/java/com/heimuheimu/naivemonitor/ibatis/SmartSqlMapClientTemplate.java)
 类来实现 SQL 执行监控功能。
