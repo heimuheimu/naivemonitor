@@ -146,7 +146,7 @@ public class PrometheusExporter {
                     .append(escapeHelpText(data.getHelpText())).append(LINE_FEED_CHARACTER);
         }
         dataText.append("# TYPE ").append(metricName).append(" ")
-                .append(data.getType()).append(LINE_FEED_CHARACTER);
+                .append(data.getType().getType()).append(LINE_FEED_CHARACTER);
         List<PrometheusSample> sampleList = data.getSampleList();
         if (sampleList.isEmpty()) {
             throw new IllegalStateException("Fails to format prometheus data: `empty sample list`. Invalid data: `" + data + "`.");
@@ -178,7 +178,16 @@ public class PrometheusExporter {
             sampleText.append("}");
         }
         // append value
-        sampleText.append(" ").append(sample.getValue());
+        sampleText.append(" ");
+        if (sample.getValue() == Double.POSITIVE_INFINITY) {
+            sampleText.append("+Inf");
+        } else if (sample.getValue() == Double.NEGATIVE_INFINITY) {
+            sampleText.append("-Inf");
+        } else if (Double.isNaN(sample.getValue())) {
+            sampleText.append("Nan");
+        } else {
+            sampleText.append(sample.getValue());
+        }
         // append timestamp
         if (sample.getTimestamp() != -1) {
             sampleText.append(" ").append(sample.getTimestamp());
