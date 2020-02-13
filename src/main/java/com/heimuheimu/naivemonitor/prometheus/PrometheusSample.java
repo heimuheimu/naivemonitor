@@ -163,6 +163,30 @@ public class PrometheusSample {
         }
     }
 
+    /**
+     * 创建一个 PrometheusSample 实例。
+     *
+     * @param value 样本数据数值
+     * @return PrometheusSample 实例
+     */
+    public static PrometheusSample build(double value) {
+        return build(value, -1);
+    }
+
+    /**
+     * 创建一个 PrometheusSample 实例。
+     *
+     * @param value 样本数据数值
+     * @param timestamp 样本数据采集时间戳，如果值小于 0，则认为没有设置时间戳
+     * @return PrometheusSample 实例
+     */
+    public static PrometheusSample build(double value, long timestamp) {
+        PrometheusSample sample = new PrometheusSample();
+        sample.setValue(value);
+        sample.setTimestamp(timestamp);
+        return sample;
+    }
+
     @Override
     public String toString() {
         return "PrometheusSample{" +

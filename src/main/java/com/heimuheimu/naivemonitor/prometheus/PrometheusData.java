@@ -79,14 +79,31 @@ public class PrometheusData {
     /**
      * 构造一个 PrometheusData 实例。
      *
-     * @param type 监控指标类型，不允许为 {@code null}
+     * @param type       监控指标类型，不允许为 {@code null}
+     * @param metricName 监控指标名称，例如：http_requests_total，必须符合以下正则匹配："[a-zA-Z_:][a-zA-Z0-9_:]*"
      * @throws IllegalArgumentException 如果 type 为 {@code null}，将会抛出此异常
+     * @throws IllegalArgumentException 如果监控指标名称不符合正则规则，将会抛出此异常
      */
-    public PrometheusData(PrometheusType type) throws IllegalArgumentException {
+    public PrometheusData(PrometheusType type, String metricName) throws IllegalArgumentException {
+        this(type, metricName, "");
+    }
+
+    /**
+     * 构造一个 PrometheusData 实例。
+     *
+     * @param type       监控指标类型，不允许为 {@code null}
+     * @param metricName 监控指标名称，例如：http_requests_total，必须符合以下正则匹配："[a-zA-Z_:][a-zA-Z0-9_:]*"
+     * @param helpText   监控指标帮助文本，允许为 {@code null} 或空
+     * @throws IllegalArgumentException 如果 type 为 {@code null}，将会抛出此异常
+     * @throws IllegalArgumentException 如果监控指标名称不符合正则规则，将会抛出此异常
+     */
+    public PrometheusData(PrometheusType type, String metricName, String helpText) throws IllegalArgumentException {
         if (type == null) {
             throw new IllegalArgumentException("Fails to create `PrometheusData`: `type could not be null`.");
         }
         this.type = type;
+        setMetricName(metricName);
+        setHelpText(helpText);
     }
 
     /**
@@ -132,7 +149,7 @@ public class PrometheusData {
     /**
      * 设置监控指标帮助文本。
      *
-     * @param helpText 监控指标帮助文本
+     * @param helpText 监控指标帮助文本，允许为 {@code null} 或空
      */
     public void setHelpText(String helpText) {
         this.helpText = helpText != null ? helpText : "";
@@ -220,6 +237,54 @@ public class PrometheusData {
                 }
             }
         }
+    }
+
+    /**
+     * 创建一个监控指标类型为 Counter 的 PrometheusData 实例。
+     *
+     * @param metricName 监控指标名称，例如：http_requests_total，必须符合以下正则匹配："[a-zA-Z_:][a-zA-Z0-9_:]*"
+     * @param helpText   监控指标帮助文本，允许为 {@code null} 或空
+     * @return PrometheusData 实例
+     * @throws IllegalArgumentException 如果监控指标名称不符合正则规则，将会抛出此异常
+     */
+    public static PrometheusData buildCounter(String metricName, String helpText) throws IllegalArgumentException {
+        return new PrometheusData(PrometheusType.Counter, metricName, helpText);
+    }
+
+    /**
+     * 创建一个监控指标类型为 Gauge 的 PrometheusData 实例。
+     *
+     * @param metricName 监控指标名称，例如：http_requests_total，必须符合以下正则匹配："[a-zA-Z_:][a-zA-Z0-9_:]*"
+     * @param helpText   监控指标帮助文本，允许为 {@code null} 或空
+     * @return PrometheusData 实例
+     * @throws IllegalArgumentException 如果监控指标名称不符合正则规则，将会抛出此异常
+     */
+    public static PrometheusData buildGauge(String metricName, String helpText) throws IllegalArgumentException {
+        return new PrometheusData(PrometheusType.Gauge, metricName, helpText);
+    }
+
+    /**
+     * 创建一个监控指标类型为 Histogram 的 PrometheusData 实例。
+     *
+     * @param metricName 监控指标名称，例如：http_requests_total，必须符合以下正则匹配："[a-zA-Z_:][a-zA-Z0-9_:]*"
+     * @param helpText   监控指标帮助文本，允许为 {@code null} 或空
+     * @return PrometheusData 实例
+     * @throws IllegalArgumentException 如果监控指标名称不符合正则规则，将会抛出此异常
+     */
+    public static PrometheusData buildHistogram(String metricName, String helpText) throws IllegalArgumentException {
+        return new PrometheusData(PrometheusType.Histogram, metricName, helpText);
+    }
+
+    /**
+     * 创建一个监控指标类型为 Summary 的 PrometheusData 实例。
+     *
+     * @param metricName 监控指标名称，例如：http_requests_total，必须符合以下正则匹配："[a-zA-Z_:][a-zA-Z0-9_:]*"
+     * @param helpText   监控指标帮助文本，允许为 {@code null} 或空
+     * @return PrometheusData 实例
+     * @throws IllegalArgumentException 如果监控指标名称不符合正则规则，将会抛出此异常
+     */
+    public static PrometheusData buildSummary(String metricName, String helpText) throws IllegalArgumentException {
+        return new PrometheusData(PrometheusType.Summary, metricName, helpText);
     }
 
     @Override
