@@ -81,15 +81,21 @@ public class GarbageCollectorMonitor {
     /**
      * JVM GC（垃圾回收）报警器列表，当 GC 操作时间大于预设值时，将会进行实时报警
      */
-    private final CopyOnWriteArrayList<GarbageCollectorAlarm> GC_ALARM_LIST = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<GarbageCollectorAlarm> gcAlarmList = new CopyOnWriteArrayList<>();
+
+    /**
+     * JVM GC 管理器列表
+     */
+    private final List<GarbageCollectorMXBean> gcMXBeanList;
 
     /**
      * 构造一个 GarbageCollectorMonitor 实例。
      */
     private GarbageCollectorMonitor() {
+        this.gcMXBeanList = ManagementFactory.getGarbageCollectorMXBeans();
         if (isGarbageCollectionNotificationInfoSupported) {
             GarbageCollectorNotificationListener gcNotificationListener = new GarbageCollectorNotificationListener();
-            for (GarbageCollectorMXBean gcMXBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+            for (GarbageCollectorMXBean gcMXBean : gcMXBeanList) {
                 if (gcMXBean instanceof NotificationEmitter) {
                     ((NotificationEmitter) gcMXBean).addNotificationListener(gcNotificationListener, null, null);
                     LOGGER.info("Add gc notification success, name: `" + gcMXBean.getName() + "`.");
@@ -108,7 +114,7 @@ public class GarbageCollectorMonitor {
     public List<GCStatistics> getGCStatisticsList() {
         List<GCStatistics> statisticsList = new ArrayList<>();
         try {
-            for (GarbageCollectorMXBean gcMXBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+            for (GarbageCollectorMXBean gcMXBean : gcMXBeanList) {
                 String collectorName = gcMXBean.getName();
                 GCStatistics statistics = new GCStatistics();
                 statistics.setName(collectorName);
@@ -134,7 +140,7 @@ public class GarbageCollectorMonitor {
      * @param gcAlarm JVM GC（垃圾回收）报警器
      */
     void registerGarbageCollectorAlarm(GarbageCollectorAlarm gcAlarm) {
-        GC_ALARM_LIST.add(gcAlarm);
+        gcAlarmList.add(gcAlarm);
         LOGGER.info("Register GarbageCollectorAlarm success: {}", gcAlarm);
     }
 
@@ -171,7 +177,7 @@ public class GarbageCollectorMonitor {
                     updateMaxDuration(collectorName, duration);
                     LOGGER.debug("Update max collections time success. `gcName`:`{}`. `duration`:`{}ms`.",
                             collectorName, duration);
-                    for (GarbageCollectorAlarm gcAlarm : GC_ALARM_LIST) {
+                    for (GarbageCollectorAlarm gcAlarm : gcAlarmList) {
                         try {
                             gcAlarm.check(collectorName, duration);
                         } catch (Exception e) { //should not happen
