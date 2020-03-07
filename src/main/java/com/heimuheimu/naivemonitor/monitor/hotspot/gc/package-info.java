@@ -26,5 +26,6 @@
  * 提供 JVM GC（垃圾回收）监控器。
  *
  * @author heimuheimu
+ * @since 1.1
  */
 package com.heimuheimu.naivemonitor.monitor.hotspot.gc;

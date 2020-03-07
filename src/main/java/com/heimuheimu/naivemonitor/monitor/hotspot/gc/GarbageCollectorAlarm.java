@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p><strong>说明：</strong>GarbageCollectorAlarm 类是线程安全的，可在多个线程中使用同一个实例。</p>
  *
  * @author heimuheimu
+ * @since 1.1
  */
 public class GarbageCollectorAlarm {
 

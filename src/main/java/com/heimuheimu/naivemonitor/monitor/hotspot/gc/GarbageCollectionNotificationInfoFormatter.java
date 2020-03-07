@@ -34,6 +34,7 @@ import java.util.Map;
  * 提供将 GarbageCollectionNotificationInfo 转换为文本的方法，通常在日志打印中使用。
  *
  * @author heimuheimu
+ * @since 1.1
  */
 public class GarbageCollectionNotificationInfoFormatter {
 

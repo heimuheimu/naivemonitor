@@ -26,5 +26,6 @@
  * 提供 JVM 线程信息监控器。
  *
  * @author heimuheimu
+ * @since 1.1
  */
 package com.heimuheimu.naivemonitor.monitor.hotspot.thread;

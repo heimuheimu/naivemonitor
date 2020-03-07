@@ -30,6 +30,7 @@ package com.heimuheimu.naivemonitor.monitor.hotspot.gc;
  * <p><strong>说明：</strong>GCStatistics 类是非线程安全的，不允许多个线程使用同一个实例。</p>
  *
  * @author heimuheimu
+ * @since 1.1
  */
 public class GCStatistics {
 
