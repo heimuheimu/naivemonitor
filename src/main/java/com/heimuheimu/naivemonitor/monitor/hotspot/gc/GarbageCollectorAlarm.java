@@ -28,6 +28,7 @@ import com.heimuheimu.naivemonitor.alarm.NaiveServiceAlarm;
 import com.heimuheimu.naivemonitor.alarm.ServiceAlarmMessageNotifier;
 import com.heimuheimu.naivemonitor.alarm.ServiceContext;
 import com.heimuheimu.naivemonitor.util.MonitorUtil;
+import com.sun.management.GarbageCollectionNotificationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,16 +149,17 @@ public class GarbageCollectorAlarm {
     /**
      * 检查 GC 操作时间是否大于等于设置的阈值，如果是，则通过报警消息通知器进行报警。
      *
-     * @param collectorName 垃圾回收器名称
-     * @param duration      GC 操作时间
+     * @param gcNotificationInfo GC 操作完成后的通知信息
      */
-    public void check(String collectorName, long duration) {
+    public void check(GarbageCollectionNotificationInfo gcNotificationInfo) {
         try {
+            String collectorName = gcNotificationInfo.getGcName();
+            long duration = gcNotificationInfo.getGcInfo().getDuration();
             if (this.collectorName.isEmpty() || this.collectorName.equals(collectorName)) {
                 if (duration >= durationThreshold) {
                     CRASHED_COLLECTOR_MAP.put(collectorName, Boolean.TRUE);
                     alarm.onCrashed(getServiceContext(collectorName));
-                    LOGGER.error("GC duration is too slow. `collectorName`:`{}`. `duration`:`{}ms`", collectorName, duration);
+                    LOGGER.warn("GC duration is too slow. {}", GarbageCollectionNotificationInfoFormatter.format(gcNotificationInfo));
                 } else {
                     if (CRASHED_COLLECTOR_MAP.remove(collectorName) != null) {
                         alarm.onRecovered(getServiceContext(collectorName));
@@ -165,8 +167,7 @@ public class GarbageCollectorAlarm {
                 }
             }
         } catch (Exception e) { //should not happen
-            String errorMessage = "Fails to check gc duration: `unexpected error`. `collectorName`:`" + collectorName
-                    + "`. `duration`:`" + duration + "ms`";
+            String errorMessage = "Fails to check gc duration: `unexpected error`. " + GarbageCollectionNotificationInfoFormatter.format(gcNotificationInfo);
             LOGGER.error(errorMessage, e);
         }
     }

@@ -175,14 +175,15 @@ public class GarbageCollectorMonitor {
                     String collectorName = gcNotificationInfo.getGcName();
                     long duration = gcInfo.getDuration();
                     updateMaxDuration(collectorName, duration);
-                    LOGGER.debug("Update max collections time success. `gcName`:`{}`. `duration`:`{}ms`.",
-                            collectorName, duration);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug(GarbageCollectionNotificationInfoFormatter.format(gcNotificationInfo));
+                    }
                     for (GarbageCollectorAlarm gcAlarm : gcAlarmList) {
                         try {
-                            gcAlarm.check(collectorName, duration);
+                            gcAlarm.check(gcNotificationInfo);
                         } catch (Exception e) { //should not happen
-                            LOGGER.error("Fails to check gc duration: `unexpected error`. `collectorName`:`"
-                                    + collectorName + "`. `duration`:`" + duration + "ms`. `gcAlarm`:`" + gcAlarm + "`", e);
+                            LOGGER.error("Fails to check gc duration: `unexpected error`. `gcAlarm`:`" + gcAlarm + "`.\n\r"
+                                    + GarbageCollectionNotificationInfoFormatter.format(gcNotificationInfo), e);
                         }
                     }
                 }
