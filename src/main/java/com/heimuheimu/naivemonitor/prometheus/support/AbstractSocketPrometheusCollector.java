@@ -64,9 +64,20 @@ public abstract class AbstractSocketPrometheusCollector implements PrometheusCol
     /**
      * 获得当前采集器使用的 Socket 读、写信息监控器列表，不允许返回 {@code null} 或空。
      *
+     * <p><strong>注意：</strong>每次返回的监控器列表必须保持一致，运行期间不允许发生变更，否则会导致差值计算错误。</p>
+     *
      * @return Socket 读、写信息监控器列表
      */
     protected abstract List<SocketMonitor> getMonitorList();
+
+    /**
+     * 获得 SocketMonitor 对应的 ID，每个 SocketMonitor 对应的 ID 应保证唯一。
+     *
+     * @param monitor Socket 读、写信息监控器
+     * @param index 监控器索引
+     * @return SocketMonitor 对应的 ID
+     */
+    protected abstract String getMonitorId(SocketMonitor monitor, int index);
 
     /**
      * 当添加完成一个样本数据后，将会调用此方法进行回调，通常用于给样本数据添加 Label。
@@ -92,14 +103,15 @@ public abstract class AbstractSocketPrometheusCollector implements PrometheusCol
         PrometheusData maxWriteBytesData = PrometheusData.buildGauge(metricPrefix + "_socket_max_write_bytes", "");
         for (int i = 0; i < monitorList.size(); i++) {
             SocketMonitor monitor = monitorList.get(i);
+            String monitorId = getMonitorId(monitor, i);
             // add ${metricPrefix}_socket_read_count sample
-            PrometheusSample readCountSample = PrometheusSample.build(deltaCalculator.delta("readCount", monitor.getReadCount()))
+            PrometheusSample readCountSample = PrometheusSample.build(deltaCalculator.delta("readCount_" + monitorId, monitor.getReadCount()))
                     .addSampleLabel("remoteAddress", monitor.getHost());
             readCountData.addSample(readCountSample);
             afterAddSample(i, readCountData, readCountSample);
 
             // add ${metricPrefix}_socket_read_bytes sample
-            PrometheusSample readBytesSample = PrometheusSample.build(deltaCalculator.delta("readBytes", monitor.getReadByteCount()))
+            PrometheusSample readBytesSample = PrometheusSample.build(deltaCalculator.delta("readBytes_" + monitorId, monitor.getReadByteCount()))
                     .addSampleLabel("remoteAddress", monitor.getHost());
             readBytesData.addSample(readBytesSample);
             afterAddSample(i, readBytesData, readBytesSample);
@@ -112,13 +124,13 @@ public abstract class AbstractSocketPrometheusCollector implements PrometheusCol
             afterAddSample(i, maxReadBytesData, maxReadBytesSample);
 
             // add ${metricPrefix}_socket_write_count sample
-            PrometheusSample writeCountSample = PrometheusSample.build(deltaCalculator.delta("writeCount", monitor.getWrittenCount()))
+            PrometheusSample writeCountSample = PrometheusSample.build(deltaCalculator.delta("writeCount_" + monitorId, monitor.getWrittenCount()))
                     .addSampleLabel("remoteAddress", monitor.getHost());
             writeCountData.addSample(writeCountSample);
             afterAddSample(i, writeCountData, writeCountSample);
 
             // add ${metricPrefix}_socket_write_bytes sample
-            PrometheusSample writeBytesSample = PrometheusSample.build(deltaCalculator.delta("writeBytes", monitor.getWrittenByteCount()))
+            PrometheusSample writeBytesSample = PrometheusSample.build(deltaCalculator.delta("writeBytes_" + monitorId, monitor.getWrittenByteCount()))
                     .addSampleLabel("remoteAddress", monitor.getHost());
             writeBytesData.addSample(writeBytesSample);
             afterAddSample(i, writeBytesData, writeBytesSample);

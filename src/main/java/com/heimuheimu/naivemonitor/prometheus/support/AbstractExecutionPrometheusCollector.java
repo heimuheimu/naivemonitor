@@ -67,6 +67,15 @@ public abstract class AbstractExecutionPrometheusCollector implements Prometheus
     protected abstract List<ExecutionMonitor> getMonitorList();
 
     /**
+     * 获得 ExecutionMonitor 对应的 ID，每个 ExecutionMonitor 对应的 ID 应保证唯一。
+     *
+     * @param monitor 操作执行信息监控器
+     * @param index 监控器索引
+     * @return ExecutionMonitor 对应的 ID
+     */
+    protected abstract String getMonitorId(ExecutionMonitor monitor, int index);
+
+    /**
      * 当添加完成一个样本数据后，将会调用此方法进行回调，通常用于给样本数据添加 Label。
      *
      * @param monitorIndex 监控器索引
@@ -88,8 +97,9 @@ public abstract class AbstractExecutionPrometheusCollector implements Prometheus
         PrometheusData maxExecutionTimeMillisecondData = PrometheusData.buildGauge(metricPrefix + "_max_exec_time_millisecond", "");
         for (int i = 0; i < monitorList.size(); i++) {
             ExecutionMonitor monitor = monitorList.get(i);
+            String monitorId = getMonitorId(monitor, i);
             // add ${metricPrefix}_exec_count sample
-            double executionCount = deltaCalculator.delta("executionCount", monitor.getTotalCount());
+            double executionCount = deltaCalculator.delta("executionCount_" + monitorId, monitor.getTotalCount());
             PrometheusSample executionCountSample = PrometheusSample.build(executionCount);
             executionCountData.addSample(executionCountSample);
             afterAddSample(i, executionCountData, executionCountSample);
@@ -103,7 +113,7 @@ public abstract class AbstractExecutionPrometheusCollector implements Prometheus
             // add ${metricPrefix}_avg_exec_time_millisecond sample
             double averageExecutionTimeMillisecond = 0d;
             if (executionCount > 0) {
-                double executionTimeNanosecond = deltaCalculator.delta("executionTime", monitor.getTotalExecutionTime());
+                double executionTimeNanosecond = deltaCalculator.delta("executionTime_" + monitorId, monitor.getTotalExecutionTime());
                 averageExecutionTimeMillisecond = executionTimeNanosecond / executionCount / 1000000d;
             }
             PrometheusSample averageExecutionTimeMillisecondSample = PrometheusSample.build(averageExecutionTimeMillisecond);
