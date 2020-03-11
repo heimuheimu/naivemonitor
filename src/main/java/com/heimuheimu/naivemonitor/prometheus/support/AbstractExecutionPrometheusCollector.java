@@ -32,6 +32,7 @@ import com.heimuheimu.naivemonitor.util.DeltaCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 操作执行信息采集器，采集时会返回以下数据：
@@ -40,6 +41,7 @@ import java.util.List;
  *     <li>${metricPrefix}_exec_peak_tps_count 相邻两次采集周期内每秒最大执行次数</li>
  *     <li>${metricPrefix}_avg_exec_time_millisecond 相邻两次采集周期内单次操作平均执行时间，单位：毫秒</li>
  *     <li>${metricPrefix}_max_exec_time_millisecond 相邻两次采集周期内单次操作最大执行时间，单位：毫秒</li>
+ *     <li>${metricPrefix}_exec_error_count{errorCode="$errorCode",errorType="$errorType"} 相邻两次采集周期内特定类型操作失败次数</li>
  * </ul>
  *
  * @author heimuheimu
@@ -58,6 +60,15 @@ public abstract class AbstractExecutionPrometheusCollector implements Prometheus
      * @return Metric 前缀
      */
     protected abstract String getMetricPrefix();
+
+    /**
+     * 获得操作执行错误类型 Map，Key 为操作失败错误码，Value 为该错误码对应的错误类型，允许返回 {@code null} 或空。
+     *
+     * <p><strong>注意：</strong>不同的错误代码对应的错误类型应保证唯一。</p>
+     *
+     * @return 操作执行错误类型 Map，Key 为操作失败错误码，Value 为该错误码对应的错误类型，可能为 {@code null} 或空
+     */
+    protected abstract Map<Integer, String> getErrorTypeMap();
 
     /**
      * 获得当前采集器使用的操作执行信息监控器列表，不允许返回 {@code null} 或空。
@@ -90,11 +101,13 @@ public abstract class AbstractExecutionPrometheusCollector implements Prometheus
         if (monitorList == null || monitorList.isEmpty()) {
             throw new IllegalArgumentException("Fails to collector prometheus data: `monitorList could not be null or empty`.");
         }
+        Map<Integer, String> errorTypeMap = getErrorTypeMap();
         String metricPrefix = getMetricPrefix();
         PrometheusData executionCountData = PrometheusData.buildGauge(metricPrefix + "_exec_count", "");
         PrometheusData peakTpsCountData = PrometheusData.buildGauge(metricPrefix + "_exec_peak_tps_count", "");
         PrometheusData averageExecutionTimeMillisecondData = PrometheusData.buildGauge(metricPrefix + "_avg_exec_time_millisecond", "");
         PrometheusData maxExecutionTimeMillisecondData = PrometheusData.buildGauge(metricPrefix + "_max_exec_time_millisecond", "");
+        PrometheusData errorCountData = PrometheusData.buildGauge(metricPrefix + "_exec_error_count", "");
         for (int i = 0; i < monitorList.size(); i++) {
             ExecutionMonitor monitor = monitorList.get(i);
             String monitorId = getMonitorId(monitor, i);
@@ -129,12 +142,26 @@ public abstract class AbstractExecutionPrometheusCollector implements Prometheus
             PrometheusSample maxExecutionTimeMillisecondSample = PrometheusSample.build(maxExecutionTimeMillisecond);
             maxExecutionTimeMillisecondData.addSample(maxExecutionTimeMillisecondSample);
             afterAddSample(i, maxExecutionTimeMillisecondData, maxExecutionTimeMillisecondSample);
+
+            // add ${metricPrefix}_exec_error_count
+            if (errorTypeMap != null) {
+                for (Integer errorCode : errorTypeMap.keySet()) {
+                    String errorType = errorTypeMap.get(errorCode);
+                    double errorCount = deltaCalculator.delta(errorCode + "_" + monitorId, monitor.getErrorCount(errorCode));
+                    PrometheusSample errorCountSample = PrometheusSample.build(errorCount)
+                            .addSampleLabel("errorCode", String.valueOf(errorCode))
+                            .addSampleLabel("errorType", errorType);
+                    errorCountData.addSample(errorCountSample);
+                    afterAddSample(i, errorCountData, errorCountSample);
+                }
+            }
         }
         List<PrometheusData> dataList = new ArrayList<>();
         dataList.add(executionCountData);
         dataList.add(peakTpsCountData);
         dataList.add(averageExecutionTimeMillisecondData);
         dataList.add(maxExecutionTimeMillisecondData);
+        dataList.add(errorCountData);
         return dataList;
     }
 }
