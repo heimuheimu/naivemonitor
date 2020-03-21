@@ -25,7 +25,9 @@
 package com.heimuheimu.naivemonitor.monitor.factory;
 
 import com.heimuheimu.naivemonitor.monitor.SqlExecutionMonitor;
+import com.heimuheimu.naivemonitor.util.CollectionUtil;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -53,8 +55,6 @@ public class NaiveSqlExecutionMonitorFactory {
 
     private static final ConcurrentHashMap<String, SqlExecutionMonitor> SQL_EXECUTION_MONITOR_MAP = new ConcurrentHashMap<>();
 
-    private static final Object lock = new Object();
-
     /**
      * 根据数据库名称获得对应的 {@code SqlExecutionMonitor} 实例，相同名称将返回同一个{@code SqlExecutionMonitor} 实例，
      * 该方法不会返回 {@code null}。
@@ -63,16 +63,27 @@ public class NaiveSqlExecutionMonitorFactory {
      * @return {@code SqlExecutionMonitor} 实例，不会返回 {@code null}
      */
     public static SqlExecutionMonitor get(String dbName) {
-        SqlExecutionMonitor monitor = SQL_EXECUTION_MONITOR_MAP.get(dbName);
-        if (monitor == null) {
-            synchronized (lock) {
-                monitor = SQL_EXECUTION_MONITOR_MAP.get(dbName);
-                if (monitor == null) {
-                    monitor = new SqlExecutionMonitor();
-                    SQL_EXECUTION_MONITOR_MAP.put(dbName, monitor);
-                }
-            }
-        }
-        return monitor;
+        return SQL_EXECUTION_MONITOR_MAP.computeIfAbsent(dbName, key -> new SqlExecutionMonitor());
+    }
+
+    /**
+     * 获得当前 SqlExecutionMonitor 工厂管理的所有 SqlExecutionMonitor 实例列表，该方法不会返回 {@code null}。
+     *
+     * @return 当前 SqlExecutionMonitor 工厂管理的所有 SqlExecutionMonitor 实例列表
+     * @since 1.1
+     */
+    public static List<SqlExecutionMonitor> getAll() {
+        return CollectionUtil.getListByPrefix(SQL_EXECUTION_MONITOR_MAP, null);
+    }
+
+    /**
+     * 根据名称前缀获得对应的 SqlExecutionMonitor 实例列表，该方法不会返回 {@code null}。
+     *
+     * @param prefix 名称前缀，如果为 {@code null} 或空，将会返回所有 SqlExecutionMonitor 实例列表
+     * @return SqlExecutionMonitor 实例列表
+     * @since 1.1
+     */
+    public static List<SqlExecutionMonitor> getListByPrefix(String prefix) {
+        return CollectionUtil.getListByPrefix(SQL_EXECUTION_MONITOR_MAP, prefix);
     }
 }

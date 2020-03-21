@@ -25,8 +25,8 @@
 package com.heimuheimu.naivemonitor.monitor.factory;
 
 import com.heimuheimu.naivemonitor.monitor.SocketMonitor;
+import com.heimuheimu.naivemonitor.util.CollectionUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,8 +45,6 @@ public class NaiveSocketMonitorFactory {
 
     private static final ConcurrentHashMap<String, SocketMonitor> SOCKET_MONITOR_MAP = new ConcurrentHashMap<>();
 
-    private static final Object lock = new Object();
-
     /**
      * 根据名称获得对应的 {@code SocketMonitor} 实例，相同名称将返回同一个{@code SocketMonitor} 实例，该方法不会返回 {@code null}。
      *
@@ -54,17 +52,7 @@ public class NaiveSocketMonitorFactory {
      * @return {@code SocketMonitor} 实例，不会返回 {@code null}
      */
     public static SocketMonitor get(String name) {
-        SocketMonitor monitor = SOCKET_MONITOR_MAP.get(name);
-        if (monitor == null) {
-            synchronized (lock) {
-                monitor = SOCKET_MONITOR_MAP.get(name);
-                if (monitor == null) {
-                    monitor = new SocketMonitor(name);
-                    SOCKET_MONITOR_MAP.put(name, monitor);
-                }
-            }
-        }
-        return monitor;
+        return SOCKET_MONITOR_MAP.computeIfAbsent(name, key -> new SocketMonitor(name));
     }
 
     /**
@@ -73,6 +61,17 @@ public class NaiveSocketMonitorFactory {
      * @return 当前 SocketMonitor 工厂管理的所有 SocketMonitor 实例列表
      */
     public static List<SocketMonitor> getAll() {
-        return new ArrayList<>(SOCKET_MONITOR_MAP.values());
+        return CollectionUtil.getListByPrefix(SOCKET_MONITOR_MAP, null);
+    }
+
+    /**
+     * 根据名称前缀获得对应的 SocketMonitor 实例列表，该方法不会返回 {@code null}。
+     *
+     * @param prefix 名称前缀，如果为 {@code null} 或空，将会返回所有 SocketMonitor 实例列表
+     * @return SocketMonitor 实例列表
+     * @since 1.1
+     */
+    public static List<SocketMonitor> getListByPrefix(String prefix) {
+        return CollectionUtil.getListByPrefix(SOCKET_MONITOR_MAP, prefix);
     }
 }
