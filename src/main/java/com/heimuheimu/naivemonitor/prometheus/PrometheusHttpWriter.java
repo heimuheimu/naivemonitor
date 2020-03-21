@@ -36,6 +36,7 @@ import java.io.PrintWriter;
  *
  * @author heimuheimu
  * @see PrometheusExporter
+ * @since 1.1
  */
 public class PrometheusHttpWriter {
 

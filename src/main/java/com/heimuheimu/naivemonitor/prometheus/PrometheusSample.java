@@ -33,6 +33,7 @@ import java.util.Map;
  * <p><strong>说明：</strong>PrometheusSample 类是非线程安全的，不允许多个线程使用同一个实例。</p>
  *
  * @author heimuheimu
+ * @since 1.1
  */
 public class PrometheusSample {
 

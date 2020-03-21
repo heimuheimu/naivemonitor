@@ -32,6 +32,7 @@ import java.util.List;
  * <p><strong>说明：</strong>PrometheusCollector 的实现类必须是线程安全的。</p>
  *
  * @author heimuheimu
+ * @since 1.1
  */
 public interface PrometheusCollector {
 

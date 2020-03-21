@@ -26,5 +26,6 @@
  * 提供基于 <a href="https://prometheus.io/docs/introduction/overview/">Prometheus</a> 监控系统实现的监控方案。
  *
  * @author heimuheimu
+ * @since 1.1
  */
 package com.heimuheimu.naivemonitor.prometheus;

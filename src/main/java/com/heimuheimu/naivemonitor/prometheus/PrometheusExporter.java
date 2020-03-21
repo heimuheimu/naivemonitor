@@ -40,6 +40,7 @@ import java.util.Map;
  *
  * @author heimuheimu
  * @see PrometheusHttpWriter
+ * @since 1.1
  */
 public class PrometheusExporter {
 

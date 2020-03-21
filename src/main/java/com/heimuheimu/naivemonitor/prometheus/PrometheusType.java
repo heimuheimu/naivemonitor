@@ -28,6 +28,7 @@ package com.heimuheimu.naivemonitor.prometheus;
  * Prometheus 监控指标类型枚举类，更多信息请参考文档：<a href="https://prometheus.io/docs/concepts/metric_types/">METRIC TYPES</a>
  *
  * @author heimuheimu
+ * @since 1.1
  */
 public enum PrometheusType {
 
