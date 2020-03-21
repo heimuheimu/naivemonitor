@@ -91,7 +91,7 @@ public abstract class AbstractExecutionPrometheusCollector implements Prometheus
      *
      * @param monitorIndex 监控器索引
      * @param data Prometheus 监控指标
-     * @param sample Prometheus 监控指标样本数
+     * @param sample Prometheus 监控指标样本数据
      */
     protected abstract void afterAddSample(int monitorIndex, PrometheusData data, PrometheusSample sample);
 
