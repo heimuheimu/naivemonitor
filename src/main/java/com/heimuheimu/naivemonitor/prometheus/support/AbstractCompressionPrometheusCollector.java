@@ -59,7 +59,7 @@ public abstract class AbstractCompressionPrometheusCollector implements Promethe
     protected abstract String getMetricPrefix();
 
     /**
-     * 获得当前采集器使用的压缩操作信息监控器列表，不允许返回 {@code null} 或空。
+     * 获得当前采集器使用的压缩操作信息监控器列表，如果返回 {@code null} 或空，调用 {@link #getList()} 方法将会返回空列表。
      *
      * @return 压缩操作信息监控器列表
      */
@@ -87,7 +87,7 @@ public abstract class AbstractCompressionPrometheusCollector implements Promethe
     public List<PrometheusData> getList() {
         List<CompressionMonitor> monitorList = getMonitorList();
         if (monitorList == null || monitorList.isEmpty()) {
-            throw new IllegalArgumentException("Fails to collector prometheus data: `monitorList could not be null or empty`.");
+            return new ArrayList<>();
         }
         String metricPrefix = getMetricPrefix();
         PrometheusData compressedCountData = PrometheusData.buildGauge(metricPrefix + "_compression_count", "");

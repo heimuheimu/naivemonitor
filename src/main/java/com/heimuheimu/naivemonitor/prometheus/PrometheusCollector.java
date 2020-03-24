@@ -37,9 +37,9 @@ import java.util.List;
 public interface PrometheusCollector {
 
     /**
-     * 采集 Prometheus 监控指标，不允许返回 {@code null} 或空列表。
+     * 采集 Prometheus 监控指标，允许返回 {@code null} 或空列表。
      *
-     * @return Prometheus 监控指标列表，不会为 {@code null} 或空列表
+     * @return Prometheus 监控指标列表，可能为 {@code null} 或空列表
      */
     List<PrometheusData> getList();
 }

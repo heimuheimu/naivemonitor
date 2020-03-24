@@ -62,9 +62,7 @@ public abstract class AbstractSocketPrometheusCollector implements PrometheusCol
     protected abstract String getMetricPrefix();
 
     /**
-     * 获得当前采集器使用的 Socket 读、写信息监控器列表，不允许返回 {@code null} 或空。
-     *
-     * <p><strong>注意：</strong>每次返回的监控器列表必须保持一致，运行期间不允许发生变更，否则会导致差值计算错误。</p>
+     * 获得当前采集器使用的 Socket 读、写信息监控器列表，如果返回 {@code null} 或空，调用 {@link #getList()} 方法将会返回空列表。
      *
      * @return Socket 读、写信息监控器列表
      */
@@ -92,7 +90,7 @@ public abstract class AbstractSocketPrometheusCollector implements PrometheusCol
     public List<PrometheusData> getList() {
         List<SocketMonitor> monitorList = getMonitorList();
         if (monitorList == null || monitorList.isEmpty()) {
-            throw new IllegalArgumentException("Fails to collector prometheus data: `monitorList could not be null or empty`.");
+            return new ArrayList<>();
         }
         String metricPrefix = getMetricPrefix();
         PrometheusData readCountData = PrometheusData.buildGauge(metricPrefix + "_socket_read_count", "");

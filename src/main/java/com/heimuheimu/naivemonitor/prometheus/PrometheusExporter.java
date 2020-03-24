@@ -112,11 +112,7 @@ public class PrometheusExporter {
                 LOGGER.error(errorMessage, e);
                 throw new IllegalStateException(errorMessage, e);
             }
-            if (dataList == null || dataList.isEmpty()) {
-                String errorMessage = "Fails to export prometheus data: `empty data list`. Collector: `" + collector + "`.";
-                LOGGER.error(errorMessage);
-                throw new IllegalStateException(errorMessage);
-            } else {
+            if (dataList != null && !dataList.isEmpty()) {
                 for (PrometheusData data : dataList) {
                     try {
                         text.append(formatData(data)).append(LINE_FEED_CHARACTER);
