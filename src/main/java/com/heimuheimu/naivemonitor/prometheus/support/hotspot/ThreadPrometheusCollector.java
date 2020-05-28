@@ -35,8 +35,8 @@ import java.util.List;
 /**
  * JVM 线程信息采集器，采集时会返回以下数据项：
  * <ul>
- *     <li>hotspot_thread_count 当前存活线程总数</li>
- *     <li>hotspot_daemon_thread_count 当前存活的 Daemon 线程总数</li>
+ *     <li>hotspot_thread_count 当前存活线程总数，包括 daemon 和 non-daemon 线程</li>
+ *     <li>hotspot_daemon_thread_count 当前存活的 daemon 线程总数</li>
  *     <li>hotspot_total_started_thread_count 累计启动过的线程总数</li>
  *     <li>hotspot_peak_thread_count 相邻两次采集周期内峰值存活线程总数</li>
  * </ul>

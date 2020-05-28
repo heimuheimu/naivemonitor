@@ -33,8 +33,8 @@ import java.util.List;
 /**
  * JVM 线程信息采集器。该采集器的采集周期为 30 秒，采集时会返回以下数据项：
  * <ul>
- * <li>hotspot_thread_count/module=hotspot 当前存活线程总数</li>
- * <li>hotspot_daemon_thread_count/module=hotspot 当前存活的 Daemon 线程总数</li>
+ * <li>hotspot_thread_count/module=hotspot 当前存活线程总数，包括 daemon 和 non-daemon 线程</li>
+ * <li>hotspot_daemon_thread_count/module=hotspot 当前存活的 daemon 线程总数</li>
  * <li>hotspot_total_started_thread_count/module=hotspot 累计启动过的线程总数</li>
  * <li>hotspot_peak_thread_count/module=hotspot 30 秒内峰值存活线程总数</li>
  * </ul>
