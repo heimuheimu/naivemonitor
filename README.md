@@ -12,17 +12,21 @@
     <dependency>
         <groupId>com.heimuheimu</groupId>
         <artifactId>naivemonitor</artifactId>
-        <version>1.0</version>
+        <version>1.1-SNAPSHOT</version>
     </dependency>
 ```
 
-## 数据监控 DEMO
+## 执行信息监控 DEMO
   场景：对用户注册操作进行数据监控（注意：示例代码仅为说明如何使用 [ExecutionMonitor](https://github.com/heimuheimu/naivemonitor/blob/master/src/main/java/com/heimuheimu/naivemonitor/monitor/ExecutionMonitor.java)。）
 ```java
 @Controller
 public class UserRegisterController { //用户注册使用的 Controller，数据监控可根据自身需求放在任意层级，例如 Service 层、Dao 层。
-    
-    private final ExecutionMonitor monitor = NaiveExecutionMonitorFactory.get("UserRegister"); //获取用户注册操作执行信息监控器
+
+    public final int ERROR_CODE_DUPLICATE_USERNAME = -1; // 用户注册错误代码：用户名已存在
+
+    public final int ERROR_CODE_UNEXPECTED_ERROR = -2; // 用户注册错误代码：预期外异常
+
+    public final ExecutionMonitor USER_REGISTER_MONITOR = NaiveExecutionMonitorFactory.get("UserRegister"); //获取用户注册操作执行信息监控器
     
     @Autowired
     private UserService userService;
@@ -30,26 +34,136 @@ public class UserRegisterController { //用户注册使用的 Controller，数�
     @RequestMapping(value = "/register")
     @ResponseBody
     public boolean register(@RequestParam("username") String username, @RequestParam("password") String password) {
-        long startTime = System.nanoTime();
+        long startNanoTime = System.nanoTime();
         try {
             if (userService.isExist(username)) { //如果用户名已存在
-                monitor.onError(-1); //对用户名已存在的错误进行监控
+                USER_REGISTER_MONITOR.onError(ERROR_CODE_DUPLICATE_USERNAME); //对用户名已存在的错误进行监控
                 return false;
             }
             userService.add(username, password); //创建用户
             return true;
         } catch (Execution e) {
-            monitor.onError(-2); //对执行过程中出现预期外异常进行监控
+            USER_REGISTER_MONITOR.onError(ERROR_CODE_UNEXPECTED_ERROR); //对执行过程中出现预期外异常进行监控
             return false;
         } finally{
-            monitor.onExecuted(startTime); //对每一个注册操作进行监控
+            USER_REGISTER_MONITOR.onExecuted(startNanoTime); //对每一个注册操作进行监控
         }
     }
 }
 ```
-  实现用户注册操作 Falcon 监控数据采集器：
+
+## Prometheus 监控系统(推荐使用)数据采集 DEMO
+#### 1. 实现用户注册操作 Prometheus 监控数据采集器：
 ```java
-public class UserRegisterDataCollector extends AbstractExecutionDataCollector {
+public class UserRegisterPrometheusCollector extends AbstractExecutionPrometheusCollector {
+    
+    @Override
+    protected String getMetricPrefix() { // 获得监控指标前缀
+        return "bookstore_user_register"; 
+    }
+
+    @Override
+    protected Map<Integer, String> getErrorTypeMap() { // 获得执行错误代码映射表
+        Map<Integer, String> errorTypeMap = new HashMap<>();
+        errorTypeMap.put(UserRegisterController.ERROR_CODE_DUPLICATE_USERNAME, "DuplicateUsername");
+        errorTypeMap.put(UserRegisterController.ERROR_CODE_UNEXPECTED_ERROR, "UnexpectedError");
+        return errorTypeMap;
+    }
+
+    @Override
+    protected List<ExecutionMonitor> getMonitorList() { // 获得需要采集的操作执行信息监控器列表
+        return Collections.singletonList(UserRegisterController.USER_REGISTER_MONITOR);
+    }
+    
+    @Override
+    protected String getMonitorId(ExecutionMonitor executionMonitor, int index) { // 获得 ExecutionMonitor 对应的 ID，每个 ExecutionMonitor 对应的 ID 应保证唯一
+        return String.valueOf(index);
+    }
+
+    @Override
+    protected void afterAddSample(int monitorIndex, PrometheusData data, PrometheusSample sample) { // 当添加完成一个样本数据后，将会调用此方法进行回调，通常用于给样本数据添加 Label
+        // no-op
+    }
+}
+```
+#### 2. 实现 Prometheus 监控指标导出 Controller（注意：请勿将此 Controller 暴露给公网访问，需通过策略仅允许 Prometheus 服务器或者内网访问）
+```java
+@Controller
+@RequestMapping("/internal/")
+public class PrometheusMetricsController {
+    
+    private final PrometheusExporter exporter;
+    
+    @Autowired
+    public PrometheusMetricsController(PrometheusExporter exporter) {
+        this.exporter = exporter;
+    }
+    
+    @RequestMapping("/metrics")
+    public void metrics(HttpServletResponse response) throws IOException {
+        PrometheusHttpWriter.write(exporter.export(), response);
+    }
+}
+```
+#### 3. 在 Spring 中配置 PrometheusExporter 实例
+```xml
+    <bean name="prometheusExporter" class="com.heimuheimu.naivemonitor.prometheus.PrometheusExporter">
+        <constructor-arg index="0" >
+            <list>
+                <!-- JVM 监控信息采集器-->
+                <bean class="com.heimuheimu.naivemonitor.prometheus.support.hotspot.HotspotCompositePrometheusCollector" />
+                <!-- 用户注册执行监控信息采集器 -->
+                <bean class="com.heimuheimu.bookstore.monitor.prometheus.UserRegisterPrometheusCollector" />
+            </list>
+        </constructor-arg>
+    </bean>
+```
+#### 4. 在 Prometheus 服务中配置对应的 Job
+  完成以上工作后，在 Prometheus 系统中即可找到以下监控指标：
+* 用户注册执行信息指标：
+  * bookstore_user_register_exec_count    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内用户注册执行次数
+  * bookstore_user_register_exec_peak_tps_count    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内每秒最大用户注册执行次数
+  * bookstore_user_register_avg_exec_time_millisecond    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内用户注册平均执行时间，单位：毫秒
+  * bookstore_user_register_max_exec_time_millisecond    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内单次用户注册最大执行时间，单位：毫秒
+  * bookstore_user_register_exec_error_count{errorCode="-1",errorType="DuplicateUsername"}    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内用户注册操作出现用户名重复的错误次数
+  * bookstore_user_register_exec_error_count{errorCode="-2",errorType="UnexpectedError"}    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内用户注册操作出现预期外异常的错误次数
+* JVM 类加载信息指标：
+  * hotspot_loaded_class_count    &nbsp;&nbsp;&nbsp;&nbsp; 当前已加载的类数量
+  * hotspot_total_loaded_class_count    &nbsp;&nbsp;&nbsp;&nbsp; 累计加载过的类数量
+  * hotspot_total_unloaded_class_count    &nbsp;&nbsp;&nbsp;&nbsp; 累计卸载过的类数量
+* JVM GC（垃圾回收）信息指标：
+  * hotspot_gc_count{name="$collectorName"}    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内执行的 GC 操作次数
+  * hotspot_gc_time_milliseconds{name="$collectorName"}    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内执行 GC 操作消耗的总时间，单位：毫秒
+  * hotspot_gc_max_duration_millisecond{name="$collectorName"}    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内单次 GC 执行最大时间，单位：毫秒
+* JVM 内存使用信息指标：
+  * hotspot_heap_memory_init_bytes    &nbsp;&nbsp;&nbsp;&nbsp; 当前 heap 内存区域初始化内存大小，单位：字节
+  * hotspot_heap_memory_used_bytes    &nbsp;&nbsp;&nbsp;&nbsp; 当前 heap 内存区域正在使用的内存大小，单位：字节
+  * hotspot_heap_memory_committed_bytes    &nbsp;&nbsp;&nbsp;&nbsp; 当前 heap 内存区域保证可使用的内存大小，单位：字节
+  * hotspot_heap_memory_max_bytes    &nbsp;&nbsp;&nbsp;&nbsp; 当前 heap 内存区域最大可使用的内存大小，单位：字节
+  * hotspot_nonheap_memory_init_bytes    &nbsp;&nbsp;&nbsp;&nbsp; 当前 non-heap 内存区域初始化内存大小，单位：字节
+  * hotspot_nonheap_memory_used_bytes    &nbsp;&nbsp;&nbsp;&nbsp; 当前 non-heap 内存区域正在使用的内存大小，单位：字节
+  * hotspot_nonheap_memory_committed_bytes    &nbsp;&nbsp;&nbsp;&nbsp; 当前 non-heap 内存区域保证可使用的内存大小，单位：字节
+  * hotspot_nonheap_memory_max_bytes    &nbsp;&nbsp;&nbsp;&nbsp; 当前 non-heap 内存区域最大可使用的内存大小，单位：字节
+  * hotspot_memory_pool_init_bytes{name="$poolName"}    &nbsp;&nbsp;&nbsp;&nbsp; 该内存池区域初始化内存大小，单位：字节
+  * hotspot_memory_pool_used_bytes{name="$poolName"}    &nbsp;&nbsp;&nbsp;&nbsp; 该内存池区域正在使用的内存大小，单位：字节
+  * hotspot_memory_pool_committed_bytes{name="$poolName"}    &nbsp;&nbsp;&nbsp;&nbsp; 该内存池区域保证可使用的内存大小，单位：字节
+  * hotspot_memory_pool_max_bytes{name="$poolName"}    &nbsp;&nbsp;&nbsp;&nbsp; 该内存池区域最大可使用的内存大小，单位：字节
+  * hotspot_memory_pool_peak_init_bytes{name="$poolName"}    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内该内存池区域达到使用峰值时的初始化内存大小，单位：字节
+  * hotspot_memory_pool_peak_used_bytes{name="$poolName"}    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内该内存池区域达到使用峰值时的使用的内存大小，单位：字节
+  * hotspot_memory_pool_peak_committed_bytes{name="$poolName"}    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内该内存池区域达到使用峰值时的保证可使用的内存大小，单位：字节
+  * hotspot_memory_pool_peak_max_bytes{name="$poolName"}    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内该内存池区域达到使用峰值时的最大可使用的内存大小，单位：字节
+* JVM 线程信息采集器
+  * hotspot_thread_count    &nbsp;&nbsp;&nbsp;&nbsp; 当前存活线程总数，包括 daemon 和 non-daemon 线程
+  * hotspot_daemon_thread_count    &nbsp;&nbsp;&nbsp;&nbsp; 当前存活的 daemon 线程总数  
+  * hotspot_total_started_thread_count    &nbsp;&nbsp;&nbsp;&nbsp; 累计启动过的线程总数
+  * hotspot_peak_thread_count    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内峰值存活线程总数
+  
+  更多 Prometheus 监控数据采集器的写法可参考 [naiveredis](https://github.com/heimuheimu/naiveredis) 等项目，[点击查看源码](https://github.com/heimuheimu/naiveredis/tree/master/src/main/java/com/heimuheimu/naiveredis/monitor/prometheus)
+  
+## Falcon 监控系统数据采集 DEMO
+#### 1. 实现用户注册操作 Falcon 监控数据采集器：
+```java
+public class UserRegisterFalconDataCollector extends AbstractExecutionDataCollector {
     
     @Override
     protected Map<Integer, String> getErrorMetricSuffixMap() {
@@ -66,7 +180,7 @@ public class UserRegisterDataCollector extends AbstractExecutionDataCollector {
 
     @Override
     protected List<ExecutionMonitor> getExecutionMonitorList() {
-        return Collections.singletonList(NaiveExecutionMonitorFactory.get("UserRegister"));
+        return Collections.singletonList(UserRegisterController.);
     }
 
     @Override
@@ -80,24 +194,60 @@ public class UserRegisterDataCollector extends AbstractExecutionDataCollector {
     }
 } 
 ```
-  在 Spring 中配置 Falcon 数据推送：
+#### 2. 在 Spring 中配置 Falcon 数据推送：
 ```xml
     <bean id="falconReporter" class="com.heimuheimu.naivemonitor.falcon.FalconReporter" init-method="init" destroy-method="close">
         <constructor-arg index="0" value="http://127.0.0.1:1988/v1/push" /> <!-- Falcon 监控数据推送地址-->
         <constructor-arg index="1">
             <list>
-                <bean class="com.heimuheimu.naivemonitor.demo.falcon.UserRegisterDataCollector" />
+                <!-- JVM 监控信息采集器-->
+                <bean class="com.heimuheimu.naivemonitor.prometheus.support.hotspot.HotspotCompositePrometheusCollector" />
+                <!-- 用户注册执行监控信息采集器 -->
+                <bean class="com.heimuheimu.bookstore.monitor.falcon.UserRegisterFalconDataCollector" />
             </lit>
         </constructor-arg>
     </bean>
 ```
-   完成以上工作后，在 Falcon 系统中可以找到以下数据项：
-* bookstore_register_tps/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内每秒平均用户注册次数
-* bookstore_register_peak_tps/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内每秒最大用户注册次数
-* bookstore_register_avg_exec_time/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次注册操作平均执行时间
-* bookstore_register_max_exec_time/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次注册操作最大执行时间
-* bookstore_register_duplicate_username/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内出现用户名已存在的错误次数
-* bookstore_register_exec_error/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内出现预期外的异常次数
+  完成以上工作后，在 Falcon 系统中可以找到以下数据项：
+* 用户注册执行信息指标：
+  * bookstore_register_tps/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内每秒平均用户注册次数
+  * bookstore_register_peak_tps/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内每秒最大用户注册次数
+  * bookstore_register_avg_exec_time/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次注册操作平均执行时间
+  * bookstore_register_max_exec_time/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次注册操作最大执行时间
+  * bookstore_register_duplicate_username/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内出现用户名已存在的错误次数
+  * bookstore_register_exec_error/module=bookstore    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内出现预期外的异常次数
+* JVM 类加载信息指标：
+  * hotspot_loaded_class_count/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前已加载的类数量
+  * hotspot_total_loaded_class_count/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 累计加载过的类数量
+  * hotspot_total_unloaded_class_count/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 累计卸载过的类数量
+* JVM GC（垃圾回收）信息指标：
+  * hotspot_gc_count/module=hotspot,name={collectorName}    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内执行的 GC 操作次数
+  * hotspot_gc_time_milliseconds/module=hotspot,name={collectorName}    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内执行 GC 操作消耗的总时间，单位：毫秒
+  * hotspot_gc_max_duration_millisecond/module=hotspot,name={collectorName}    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次 GC 执行最大时间，单位：毫秒
+* JVM 内存使用信息指标：
+  * hotspot_heap_memory_init_bytes/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前 heap 内存区域初始化内存大小，单位：字节
+  * hotspot_heap_memory_used_bytes/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前 heap 内存区域正在使用的内存大小，单位：字节
+  * hotspot_heap_memory_committed_bytes/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前 heap 内存区域保证可使用的内存大小，单位：字节
+  * hotspot_heap_memory_max_bytes/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前 heap 内存区域最大可使用的内存大小，单位：字节
+  * hotspot_nonheap_memory_init_bytes/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前 non-heap 内存区域初始化内存大小，单位：字节
+  * hotspot_nonheap_memory_used_bytes/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前 non-heap 内存区域正在使用的内存大小，单位：字节
+  * hotspot_nonheap_memory_committed_bytes/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前 non-heap 内存区域保证可使用的内存大小，单位：字节
+  * hotspot_nonheap_memory_max_bytes/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前 non-heap 内存区域最大可使用的内存大小，单位：字节
+  * hotspot_memory_pool_init_bytes/module=hotspot,name={poolName}    &nbsp;&nbsp;&nbsp;&nbsp; 该内存池区域初始化内存大小，单位：字节
+  * hotspot_memory_pool_used_bytes/module=hotspot,name={poolName}    &nbsp;&nbsp;&nbsp;&nbsp; 该内存池区域正在使用的内存大小，单位：字节
+  * hotspot_memory_pool_committed_bytes/module=hotspot,name={poolName}    &nbsp;&nbsp;&nbsp;&nbsp; 该内存池区域保证可使用的内存大小，单位：字节
+  * hotspot_memory_pool_max_bytes/module=hotspot,name={poolName}    &nbsp;&nbsp;&nbsp;&nbsp; 该内存池区域最大可使用的内存大小，单位：字节
+  * hotspot_memory_pool_peak_init_bytes/module=hotspot,name={poolName}    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内该内存池区域达到使用峰值时的初始化内存大小，单位：字节
+  * hotspot_memory_pool_peak_used_bytes/module=hotspot,name={poolName}    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内该内存池区域达到使用峰值时的使用的内存大小，单位：字节
+  * hotspot_memory_pool_peak_committed_bytes/module=hotspot,name={poolName}    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内该内存池区域达到使用峰值时的保证可使用的内存大小，单位：字节
+  * hotspot_memory_pool_peak_max_bytes/module=hotspot,name={poolName}    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内该内存池区域达到使用峰值时的最大可使用的内存大小，单位：字节
+* JVM 线程信息采集器
+  * hotspot_thread_count/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前存活线程总数，包括 daemon 和 non-daemon 线程
+  * hotspot_daemon_thread_count/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 当前存活的 daemon 线程总数  
+  * hotspot_total_started_thread_count/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 累计启动过的线程总数
+  * hotspot_peak_thread_count/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内峰值存活线程总数
+  
+  更多 Prometheus 监控数据采集器的写法可参考 [naiveredis](https://github.com/heimuheimu/naiveredis) 等项目，[点击查看源码](https://github.com/heimuheimu/naiveredis/tree/master/src/main/java/com/heimuheimu/naiveredis/monitor/falcon)
 
 ## 实时报警 DEMO
   在 Spring 中配置 [NaiveServiceAlarm](https://github.com/heimuheimu/naivemonitor/blob/master/src/main/java/com/heimuheimu/naivemonitor/alarm/NaiveServiceAlarm.java)：
@@ -273,29 +423,50 @@ log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.layout=org.apache.log4j.PatternLay
 log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.layout.ConversionPattern=%d{ISO8601} : %m%n
 ```
 
-完成以上工作后，在 Falcon 系统中可以找到以下数据项：
-
-SQL 执行错误数据项：
-* bookstore_bookstore_sql_error/module=bookstore 30 秒内 SQL 执行错误次数
-* bookstore_bookstore_sql_slow_execution/module=bookstore 30 秒内 SQL 慢查次数
-
-SQL 影响的行数数据项：
-* bookstore_bookstore_sql_max_result_size/module=bookstore 30 秒内单条 Select 语句返回的最大记录行数
-* bookstore_bookstore_sql_max_updated_rows/module=bookstore 30 秒内单条 Update 语句更新的最大行数
-* bookstore_bookstore_sql_max_deleted_rows/module=bookstore 30 秒内单条 Delete 语句删除的最大行数
-
-SQL 执行信息数据项：
-* bookstore_bookstore_sql_tps/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内 SQL 每秒平均执行次数
-* bookstore_bookstore_sql_peak_tps/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内 SQL 每秒最大执行次数
-* bookstore_bookstore_sql_avg_exec_time/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次 SQL 操作平均执行时间
-* bookstore_bookstore_sql_max_exec_time/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次 SQL 操作最大执行时间
+  完成以上工作后，在 Falcon 系统中可以找到以下数据项：
+* SQL 执行错误数据项：
+  * bookstore_bookstore_sql_error/module=bookstore 30 秒内 SQL 执行错误次数
+  * bookstore_bookstore_sql_slow_execution/module=bookstore 30 秒内 SQL 慢查次数
+* SQL 影响的行数数据项：
+  * bookstore_bookstore_sql_max_result_size/module=bookstore 30 秒内单条 Select 语句返回的最大记录行数
+  * bookstore_bookstore_sql_max_updated_rows/module=bookstore 30 秒内单条 Update 语句更新的最大行数
+  * bookstore_bookstore_sql_max_deleted_rows/module=bookstore 30 秒内单条 Delete 语句删除的最大行数
+* SQL 执行信息数据项：
+  * bookstore_bookstore_sql_tps/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内 SQL 每秒平均执行次数
+  * bookstore_bookstore_sql_peak_tps/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内 SQL 每秒最大执行次数
+  * bookstore_bookstore_sql_avg_exec_time/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次 SQL 操作平均执行时间
+  * bookstore_bookstore_sql_max_exec_time/module=bookstore &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内单次 SQL 操作最大执行时间
 
 如果你的项目在使用其它 ORM 框架，请参考 [SmartSqlMapClientTemplate](https://github.com/heimuheimu/naivemonitor/blob/master/src/main/java/com/heimuheimu/naivemonitor/ibatis/SmartSqlMapClientTemplate.java)
 类来实现 SQL 执行监控功能。
 
+## 版本发布记录
+### V1.1-SNAPSHOT
+### 新增特性：
+ * 新增 JVM 相关信息监控器：
+   * 类加载信息
+   * 垃圾回收信息
+   * 内存使用信息
+   * 线程信息
+ * 支持将监控数据推送至 Prometheus 监控系统
+
+***
+
+### V1.0
+### 特性：
+ * 提供以下多种类型监控器：
+   * 执行信息
+   * 压缩操作信息
+   * Socket 读、写信息
+   * 线程池信息
+   * SQL 执行信息
+ * 钉钉机器人实时报警
+ * 支持将监控数据推送至 Falcon 监控系统
+
 ## 更多信息
-* [Falcon 监控数据推送官方文档](https://book.open-falcon.org/zh/usage/data-push.html)
 * [钉钉机器人开发官方文档](https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1)
+* [Prometheus 监控系统（推荐使用）](https://prometheus.io/docs/introduction/overview/)
+* [Falcon 监控系统](https://book.open-falcon.org/zh/)
 * [NaiveMonitor v1.0 API Doc](https://heimuheimu.github.io/naivemonitor/api/v1.0/)
 * [NaiveMonitor v1.0 源码下载](https://heimuheimu.github.io/naivemonitor/download/naivemonitor-1.0-sources.jar)
 * [NaiveMonitor v1.0 Jar包下载](https://heimuheimu.github.io/naivemonitor/download/naivemonitor-1.0.jar)
