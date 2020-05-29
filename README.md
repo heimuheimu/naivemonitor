@@ -52,7 +52,7 @@ public class UserRegisterController { //用户注册使用的 Controller，数�
 }
 ```
 
-## Prometheus 监控系统(推荐使用)数据采集 DEMO
+## [推荐使用] Prometheus 监控系统数据采集 DEMO
 #### 1. 实现用户注册操作 Prometheus 监控数据采集器：
 ```java
 public class UserRegisterPrometheusCollector extends AbstractExecutionPrometheusCollector {
@@ -158,7 +158,9 @@ public class PrometheusMetricsController {
   * hotspot_total_started_thread_count    &nbsp;&nbsp;&nbsp;&nbsp; 累计启动过的线程总数
   * hotspot_peak_thread_count    &nbsp;&nbsp;&nbsp;&nbsp; 相邻两次采集周期内峰值存活线程总数
   
-  更多 Prometheus 监控数据采集器的写法可参考 [naiveredis](https://github.com/heimuheimu/naiveredis) 等项目，[点击查看源码](https://github.com/heimuheimu/naiveredis/tree/master/src/main/java/com/heimuheimu/naiveredis/monitor/prometheus)
+  通过 util-grafana 项目可以快速生成 Grafana 监控图表，项目地址：[https://github.com/heimuheimu/util-grafana](https://github.com/heimuheimu/util-grafana)
+  
+  更多 Prometheus 监控数据采集器的写法可参考 naiveredis 等项目，[点击查看源码](https://github.com/heimuheimu/naiveredis/tree/master/src/main/java/com/heimuheimu/naiveredis/monitor/prometheus)
   
 ## Falcon 监控系统数据采集 DEMO
 #### 1. 实现用户注册操作 Falcon 监控数据采集器：
@@ -247,7 +249,7 @@ public class UserRegisterFalconDataCollector extends AbstractExecutionDataCollec
   * hotspot_total_started_thread_count/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 累计启动过的线程总数
   * hotspot_peak_thread_count/module=hotspot    &nbsp;&nbsp;&nbsp;&nbsp; 30 秒内峰值存活线程总数
   
-  更多 Prometheus 监控数据采集器的写法可参考 [naiveredis](https://github.com/heimuheimu/naiveredis) 等项目，[点击查看源码](https://github.com/heimuheimu/naiveredis/tree/master/src/main/java/com/heimuheimu/naiveredis/monitor/falcon)
+  更多 Falcon 监控数据采集器的写法可参考 naiveredis 等项目，[点击查看源码](https://github.com/heimuheimu/naiveredis/tree/master/src/main/java/com/heimuheimu/naiveredis/monitor/falcon)
 
 ## 实时报警 DEMO
   在 Spring 中配置 [NaiveServiceAlarm](https://github.com/heimuheimu/naivemonitor/blob/master/src/main/java/com/heimuheimu/naivemonitor/alarm/NaiveServiceAlarm.java)：
@@ -465,7 +467,7 @@ log4j.appender.NAIVESQL_SLOW_EXECUTION_LOGGER.layout.ConversionPattern=%d{ISO860
 
 ## 更多信息
 * [钉钉机器人开发官方文档](https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.a5dkCS&treeId=257&articleId=105735&docType=1)
-* [Prometheus 监控系统（推荐使用）](https://prometheus.io/docs/introduction/overview/)
+* [[推荐使用] Prometheus 监控系统](https://prometheus.io/docs/introduction/overview/)
 * [Falcon 监控系统](https://book.open-falcon.org/zh/)
 * [NaiveMonitor v1.0 API Doc](https://heimuheimu.github.io/naivemonitor/api/v1.0/)
 * [NaiveMonitor v1.0 源码下载](https://heimuheimu.github.io/naivemonitor/download/naivemonitor-1.0-sources.jar)
