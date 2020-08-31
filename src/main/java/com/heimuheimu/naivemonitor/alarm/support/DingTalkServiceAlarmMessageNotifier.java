@@ -29,8 +29,13 @@ import com.heimuheimu.naivemonitor.http.NaiveHttpPost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -58,6 +63,11 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
     private final String url;
 
     /**
+     * 钉钉机器人加签密钥，允许为空
+     */
+    private final String secureKey;
+
+    /**
      * Http 代理地址，由主机名和端口号组成，用 ":" 进行分割，例如："192.168.1.1:9900"，允许为 {@code null} 或空字符串
      */
     private final String proxyHost;
@@ -68,12 +78,12 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
     private final int timeout;
 
     /**
-     * 在报警消息发送时，服务仍存在不可用时使用的图片地址
+     * 在报警消息发送时，服务仍存在不可用时使用的图片地址，允许为空
      */
     private final String crashingImageUrl;
 
     /**
-     * 在报警消息发送时，服务已恢复使用的图片地址
+     * 在报警消息发送时，服务已恢复使用的图片地址，允许为空
      */
     private final String recoveredImageUrl;
 
@@ -127,11 +137,35 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
      * @param recoveredImageUrl 在报警消息发送时，服务已恢复使用的图片地址，如果不需要，则设置 {@code null} 或空字符串
      */
     public DingTalkServiceAlarmMessageNotifier(String url, String proxyHost, int timeout, String crashingImageUrl, String recoveredImageUrl) {
+        this(url, proxyHost, timeout, crashingImageUrl, recoveredImageUrl, null);
+    }
+
+    /**
+     * 构造一个使用钉钉实现的报警消息通知器，可指定加签密钥、Http 代理地址和发送超时时间。
+     *
+     * <p>
+     *     如果本机无法访问公网，可通过 Http(Https) 代理的方式来实现钉钉报警，例如使用 Tinyproxy，更多资料请查阅：
+     *     <a href="https://tinyproxy.github.io">https://tinyproxy.github.io</a>
+     * </p>
+     *
+     * <p>
+     *     如果 url 设置为 {@code null} 或空，{@link #send(ServiceAlarmMessage)} 只进行 WARN 级别日志打印，不进行实际发送，并永远返回 {@code false}。
+     * </p>
+     *
+     * @param url 钉钉消息发送 URL 地址，允许为 {@code null} 或空
+     * @param proxyHost Http 代理地址，由主机名和端口号组成，用 ":" 进行分割，例如："192.168.1.1:9900"，允许为 {@code null} 或空字符串
+     * @param timeout 钉钉消息发送超时时间，单位：毫秒，不允许小于等于 0
+     * @param crashingImageUrl 在报警消息发送时，服务仍存在不可用时使用的图片地址，如果不需要，则设置 {@code null} 或空字符串
+     * @param recoveredImageUrl 在报警消息发送时，服务已恢复使用的图片地址，如果不需要，则设置 {@code null} 或空字符串
+     * @param secureKey 钉钉机器人加签密钥，允许为 {@code null} 或空
+     */
+    public DingTalkServiceAlarmMessageNotifier(String url, String proxyHost, int timeout, String crashingImageUrl, String recoveredImageUrl, String secureKey) {
         this.url = url;
         this.proxyHost = proxyHost;
         this.timeout = timeout;
         this.crashingImageUrl = crashingImageUrl != null ? crashingImageUrl : "";
         this.recoveredImageUrl = recoveredImageUrl != null ? recoveredImageUrl : "";
+        this.secureKey = secureKey != null ? secureKey : "";
     }
 
     @Override
@@ -139,7 +173,7 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
         if (url != null && !url.isEmpty()) {
             long startTime = System.currentTimeMillis();
             try {
-                NaiveHttpPost post = new NaiveHttpPost(url, timeout, proxyHost);
+                NaiveHttpPost post = new NaiveHttpPost(appendSignatureIfNecessary(url, secureKey), timeout, proxyHost);
                 post.getUrlConnection().setRequestProperty("Content-Type", "application/json; charset=utf-8");
                 String responseText = post.doPost(getPostBody(serviceAlarmMessage));
                 boolean isSuccess = isSuccess(responseText);
@@ -161,6 +195,26 @@ public class DingTalkServiceAlarmMessageNotifier implements ServiceAlarmMessageN
             LOGGER.warn("DingTalkServiceAlarmMessageNotifier is inactive. ServiceAlarmMessage: `" + serviceAlarmMessage + "`.");
             return false;
         }
+    }
+
+    private String appendSignatureIfNecessary(String url, String secureKey) {
+        if (url != null && !url.isEmpty() && secureKey != null && !secureKey.isEmpty()) {
+            try {
+                long timestamp = System.currentTimeMillis();
+                String stringToSign = timestamp + "\n" + secureKey;
+                Mac mac = Mac.getInstance("HmacSHA256");
+                mac.init(new SecretKeySpec(secureKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+                byte[] signData = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
+                String sign = Base64.getEncoder().encodeToString(signData);
+                if (url.indexOf('?') == -1) {
+                    url += "?";
+                } else {
+                    url += "&";
+                }
+                url += "timestamp=" + timestamp + "&sign=" + URLEncoder.encode(sign, "UTF-8");
+            } catch (Exception ignored) {}//should not happen
+        }
+        return  url;
     }
 
     private String getPostBody(ServiceAlarmMessage serviceAlarmMessage) {
